@@ -107,7 +107,7 @@ def list
       time = time.light_white
       ker = ker.light_white
       puts space\
-        +id +\
+        + id +\
         +' '*2+date\
         +' '*2+time\
         +' '*2+ker\
@@ -181,7 +181,9 @@ def showinfo(id)
   time = readinfo(id)[1]
   comm = readinfo(id)[2]
   ker = readinfo(id)[3]
-  "[#{id}] #{date} #{time} #{ker} #{comm}" 
+  nd = id.to_s.length
+  space = " "*(3-nd)
+  "#{space} [#{id}] #{date} #{time} #{ker} #{comm}" 
 end
 #==================================
 def delete
