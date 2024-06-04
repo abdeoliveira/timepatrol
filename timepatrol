@@ -72,8 +72,8 @@ def readinfo(id)
 end
 #==========================
 def list
-    title = "TIME PATROL SNAPSHOTS"
-    label= ' '*2+"ID"\
+    title = "TIMEPATROL SNAPSHOTS"
+    legend= ' '*2+"ID"\
       +' '*2+"DATE"\
       +' '*8+"TIME"\
       +' '*6+"KERNEL"\
@@ -85,8 +85,7 @@ def list
     puts lineline
     puts " "*(nline/2-tlhalf)+title.yellow.bold
     puts lineline
-    puts label.bold
-    #puts line
+    puts legend.bold
     snapid.each do |id|
       date = readinfo(id)[0]
       time = readinfo(id)[1]
@@ -137,7 +136,8 @@ def rollback
   kernel_to = readinfo(rollid)[3]
   if kernel_from != kernel_to
     puts "Running kernel (#{kernel_from}) is\
- different from snapshot [#{rollid}] kernel (#{kernel_to}).\nABORTED."
+ different from snapshot '#{rollid}' kernel \
+ (#{kernel_to}).\nABORTED.".red
     abort
   end
   #-----------------------
@@ -150,7 +150,7 @@ def rollback
     check_root = Dir.exists? @mnt+'/'+@rootvol
     check_snap = Dir.exists? @mnt+'/'+@snapvol
     unless check_root and check_snap
-      puts "Mounting stage went wrong. ABORTED."
+      puts "Mounting stage went wrong. ABORTED.".red
       abort
     end
   #----------------
