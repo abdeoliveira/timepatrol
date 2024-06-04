@@ -1,0 +1,368 @@
+#!/usr/bin/ruby
+require 'colorize'
+#===============
+@device = '/dev/mapper/root' 
+@snapdir = '/.snapshots'
+@snapvol = '@snapshots'
+@rootvol = '@root'
+max_snapshots = 50
+#===============
+unless ENV['USER'] == 'root'
+  puts "You should run as root. ABORTED."
+  abort
+end
+#==========================
+def now
+ Time.new.strftime "%Y.%m.%d;%H:%M:%S"
+end
+#==========================
+def letters
+ return [*'a'..'z',*'A'..'Z']
+end
+#==========================
+def snapid
+  ids = `btrfs subvolume list / | grep #{@snapvol}/`
+  id_list=[]
+  ids.split("\n").each do |i|
+    id_list<<i.split('/')[1].to_i
+  end
+  return id_list.sort
+end
+#==========================
+def snapshot(comm,fake)
+  id = snapid.last.to_i + 1
+  path = @snapdir + '/' + id.to_s
+  ker = `uname -r`.chomp
+  `mkdir #{path}`
+  if comm.nil? then comm = '' end
+  unless fake 
+    puts `btrfs subvolume snapshot / #{path}/data` 
+  end
+  comm = comm.gsub(';','')
+  info = "#{now};#{comm};#{ker}"
+  File.write("#{path}/info",info,mode:'w')
+end
+#==========================
+def splitstr(string,shift)
+  max = 37
+  line = ''
+  total = 0
+  string.split(' ').each do |s|
+    scut = s[0..max]
+    total = total + scut.size
+    if total < max
+      line = line + scut + ' '
+    else
+      total = scut.size
+      line = line + "\n" + ' '*shift + scut + ' ' 
+    end
+  end
+  return line
+end
+#==========================
+def readinfo(id)
+  path = @snapdir + '/' + id.to_s
+  info = File.read(path + '/info').strip.split(';')
+  date  = info[0]
+  time  = info[1]
+  desc  = info[2]
+  ker  = info[3]
+  comm = splitstr(desc,43)
+  return [date,time,comm,ker]
+end
+#==========================
+def list
+    title = "TIME PATROL SNAPSHOTS"
+    label= ' '*2+"ID"\
+      +' '*2+"DATE"\
+      +' '*8+"TIME"\
+      +' '*6+"KERNEL"\
+      +' '*9+"COMMENT"
+    tlhalf = title.length/2
+    nline = 72
+    line = ("-".light_white)*nline
+    lineline = ("=".light_white)*nline
+    puts lineline
+    puts " "*(nline/2-tlhalf)+title.yellow.bold
+    puts lineline
+    puts label.bold
+    #puts line
+    snapid.each do |id|
+      date = readinfo(id)[0]
+      time = readinfo(id)[1]
+      comm = readinfo(id)[2]
+      ker = readinfo(id)[3]
+      #--------------------
+      space = ' '*(4-id.to_s.size)
+      kspace = 15 - ker.size
+      #--------------------
+      if comm.include? '[KEEP]'
+        comm = comm.sub('[KEEP] ','')
+        comm = '[KEEP] '.green+comm.light_white
+      else
+        comm = comm.light_white
+      end
+      id = id.to_s.bold
+      date = date.light_white
+      time = time.light_white
+      ker = ker.light_white
+      puts space\
+        +id +\
+        +' '*2+date\
+        +' '*2+time\
+        +' '*2+ker\
+        +' '*kspace+comm
+    end
+    puts line
+    puts "TOTAL: #{snapid.length}".bold
+end
+#============================
+def rollback
+  countdown = 10 # seconds before rebooting
+  rollid = ARGV[1]
+  if rollid.nil?
+   puts "Choose a snapshot ID to rollback to or type any letter to ABORT:"
+   rollid = STDIN.gets.strip
+  end
+  if letters.include? rollid
+    puts 'ABORTED.'
+    abort
+  end
+  unless Dir.exists? @snapdir+'/'+rollid
+    puts "There is no ID '#{rollid}'. ABORTED"
+    abort
+  end
+  #----------------------
+  kernel_from = `uname -r`.chomp 
+  kernel_to = readinfo(rollid)[3]
+  if kernel_from != kernel_to
+    puts "Running kernel (#{kernel_from}) is\
+ different from snapshot [#{rollid}] kernel (#{kernel_to}).\nABORTED."
+    abort
+  end
+  #-----------------------
+  puts "Rolling back to the following snapshot:".light_red
+  puts showinfo(rollid).cyan
+  puts "Confirm? [y/N]".light_red
+  if STDIN.gets.chomp == 'y' 
+    `mkdir #{@mnt} && mount -o subvolid=5 #{@device} #{@mnt}`
+    #----------------
+    check_root = Dir.exists? @mnt+'/'+@rootvol
+    check_snap = Dir.exists? @mnt+'/'+@snapvol
+    unless check_root and check_snap
+      puts "Mounting stage went wrong. ABORTED."
+      abort
+    end
+  #----------------
+    id = snapid.last + 1
+    date = readinfo(rollid)[0]
+    time = readinfo(rollid)[1]
+    snapshot("pre rollback to [#{date} #{time}]",true)
+    `mv #{@mnt}/#{@rootvol} #{@mnt}/#{@snapvol}/#{id}/data`
+    `btrfs subvolume snapshot #{@mnt}/#{@snapvol}/#{rollid}/data #{@mnt}/#{@rootvol}`
+    `umount #{@mnt} && rm -r #{@mnt}`
+    root_id = `btrfs subvolume list / | grep #{@rootvol}`.split(' ')[1].to_i
+    `btrfs subvolume set-default #{root_id} /`
+    puts "Confirmed. Rebooting in..."
+      (countdown-1).times do |i| 
+        puts countdown-=1
+        sleep 1
+      end
+      puts 'BUCKLE UP!'
+      sleep 1
+    `reboot`
+    else
+      puts "ABORTED."
+    end
+end
+#==================================
+def showinfo(id)
+  date = readinfo(id)[0]
+  time = readinfo(id)[1]
+  comm = readinfo(id)[2]
+  ker = readinfo(id)[3]
+  "[#{id}] #{date} #{time} #{ker} #{comm}" 
+end
+#==================================
+def delete
+  delid = ARGV[1]
+  marked_for_deletion=[]
+  dline = '--------------------------'
+  if delid.nil?
+    puts "Select snapshot(s) to delete or type any letter to ABORT:"
+    delid = STDIN.gets.chomp
+  end
+  if letters.include? delid 
+    puts "ABORTED."
+    abort
+  end
+  if delid.include? '-'
+    delid_i = delid.split('-').first.to_i
+    delid_f = delid.split('-').last.to_i
+    if delid_i >= delid_f 
+      puts "Bad range. ABORTED."
+      abort 
+    end
+    snapid.each do |id|
+      if id >= delid_i and id <= delid_f 
+          marked_for_deletion<<id
+      end
+    end
+  elsif delid.include? ','
+    list = delid.split(',')
+    snapid.each do |id|
+      if list.include? id.to_s 
+        marked_for_deletion<<id
+      end
+    end
+  elsif delid.include? 'c='
+    snapid.each do |id|
+      if readinfo(id)[2].include? delid.sub('c=','')
+        marked_for_deletion<<id
+      end
+    end
+  elsif delid.include? 'k='
+    snapid.each do |id|
+      if readinfo(id)[3] == delid.sub('k=','')
+        marked_for_deletion<<id
+      end
+    end
+  else
+    if snapid.include? delid.to_i
+        marked_for_deletion<<delid
+    end
+  end
+    if marked_for_deletion.empty?
+      puts "No snapshot meets the given criteria. ABORTED."
+      abort
+    end
+    #=====================
+    marked_for_deletion.each do |id|
+      puts showinfo(id).cyan
+    end
+    puts "Confirm deletion of the selected snapshot(s) above? [y/N]".light_red
+    ans = STDIN.gets.chomp
+    #=====================
+  if ans == 'y' 
+    puts "Confirmed."
+    marked_for_deletion.each do |id|
+      code1 = `btrfs subvolume delete #{@snapdir}/#{id}/data; echo $?`.to_i
+      code2 = `rm -r #{@snapdir}/#{id}; echo $?`.to_i 
+      if code1+code2 > 0 then puts "FAILED deleting snapshot '#{id}'." end
+    end
+  else #if choosed N
+    puts "ABORTED."
+  end
+end
+
+def repack(snapid)
+  puts "Resorting snapshot IDs..."
+  path = @snapdir+'/'
+  snapid.each.with_index do |v,j|
+    from = path+v.to_s
+    to = path+(j+1).to_s
+    if from != to
+      `mv #{from} #{to}`
+      puts "#{v} --> #{j+1}"
+    end
+  end
+end
+
+def prune(snapid)
+  snapid.each do |id|
+    unless readinfo(id)[2].include? '[KEEP]'
+      code1 = `btrfs subvolume delete #{@snapdir}/#{id}/data; echo $?`.to_i\
+      code2 =  `rm -r #{@snapdir}/#{id}; echo $?`.to_i 
+      if code1+code2 > 0 
+        puts "FAILED deleting snapshot '#{id}'." 
+      else
+        puts "Deleted snapshot '#{id}'."
+      end
+      break
+    end
+  end
+end
+
+def mark
+  #-------------------
+  markid = ARGV[1]
+  if markid.nil?
+   puts "Choose a snapshot ID to toggle '[KEEP]' or type any letter to ABORT:"
+   markid = STDIN.gets.strip
+  end
+  if letters.include? markid
+    puts 'ABORTED.'
+    abort
+  end
+  path = @snapdir+'/'+markid
+  unless Dir.exists? path
+    puts "There is no ID '#{markid}'. ABORTED"
+    abort
+  end
+  #--------------------
+  comm = readinfo(markid)[2]
+  if comm.include? '[KEEP]'  
+    comm = comm.sub('[KEEP] ','')
+  else
+    comm = '[KEEP] '+comm
+  end
+  date = readinfo(markid)[0]
+  time = readinfo(markid)[1]
+  comm = comm.strip
+  ker  = readinfo(markid)[3]
+  info = date+';'+time+';'+comm+';'+ker
+  File.write(path+'/info',info,mode:'w')
+end
+#==================================
+opt = ARGV[0]
+if opt.nil? then opt = 'help' end
+@mnt = '/mnt/tptmp'
+#==================================
+
+if opt == 'toggle-keep'
+  if ARGV[1].nil?
+    list; mark
+  else
+    mark
+  end
+end
+
+if opt == 'snapshot'
+  if snapid.last > 9000 then repack(snapid) end
+  if snapid.length > max_snapshots then prune(snapid) end
+  snapshot(ARGV[1],false)
+end
+
+if opt == 'list'
+  list
+end
+
+if opt == 'rollback'
+  warning = "The '#{@mnt}' folder should not exist. ABORTED."
+  if Dir.exists? @mnt then puts warning; abort end
+  if ARGV[1].nil?
+    list; rollback
+  else
+    rollback
+  end
+end
+
+if opt == 'delete'
+  if ARGV[1].nil?
+    list; delete
+  else 
+    delete
+  end
+end
+
+if opt == 'help' 
+  puts 'USAGE:    timepatrol [COMMAND]'
+  puts '------------------------------'
+  puts 'COMMANDS:'
+  puts "          snapshot 'COMMENT'"
+  puts "          toggle-keep"
+  puts '          delete'
+  puts '          rollback'
+  puts '          list'
+end
+
