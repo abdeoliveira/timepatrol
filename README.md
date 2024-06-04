@@ -1,2 +1,2 @@
 # timepatrol
-## BTRFS snapshot manager and rollback 
+## BTRFS snapshot manager and rollback tool 
