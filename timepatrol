@@ -44,7 +44,7 @@ def snapshot(comm,fake)
 end
 #==========================
 def splitstr(string,shift)
-  max = 37
+  max = 35
   line = ''
   total = 0
   string.split(' ').each do |s|
@@ -96,7 +96,9 @@ def list
       kspace = 15 - ker.size
       #--------------------
       if comm.include? '[KEEP]'
-        comm = comm.sub('[KEEP] ','')
+        comm = comm.gsub('[KEEP] ','')
+        comm = comm.gsub(' [KEEP]','')
+        comm = comm.gsub('[KEEP] ','')
         comm = '[KEEP] '.green+comm.light_white
       else
         comm = comm.light_white
@@ -304,13 +306,13 @@ def mark
   #--------------------
   comm = readinfo(markid)[2]
   if comm.include? '[KEEP]'  
-    comm = comm.sub('[KEEP] ','')
+    comm = comm.gsub('[KEEP]','')
   else
-    comm = '[KEEP] '+comm
+    comm = ('[KEEP] '+comm)
   end
   date = readinfo(markid)[0]
   time = readinfo(markid)[1]
-  comm = comm.strip
+  comm = comm.split.join(' ')
   ker  = readinfo(markid)[3]
   info = date+';'+time+';'+comm+';'+ker
   File.write(path+'/info',info,mode:'w')
