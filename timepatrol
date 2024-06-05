@@ -5,7 +5,7 @@ require 'colorize'
 @snapdir = '/.snapshots'
 @snapvol = '@snapshots'
 @rootvol = '@root'
-@maxsnaps = 20
+@maxsnaps = 100
 #===============
 unless ENV['USER'] == 'root'
   puts "You should run as root. ABORTED."
@@ -262,7 +262,7 @@ def delete
 end
 #==========================
 def repack
-  puts "Resorting snapshot IDs..."
+  puts "Renumbering snapshot IDs..."
   path = @snapdir+'/'
   snapid.each.with_index do |v,j|
     from = path+v.to_s
