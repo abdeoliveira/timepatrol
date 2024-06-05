@@ -203,19 +203,16 @@ def select(action)
   end
 #---------------------------------
   5.times do |j|
-    if selid.include? keyword[j]
-      snapid.each do |id|
-        string = readinfo(id)[j]
-        if string.include? selid.sub(keyword[j],'')
-          array_selected<<id
-        end
+    snapid.each do |id|
+      string = readinfo(id)[j]
+      if string.include? selid.sub(keyword[j],'')
+        array_selected<<id
       end
     end
   end
 #--------------------------------
-  array_selid = selid.split(',')
   unless @special
-    array_selid.each do |item|
+    selid.split(',').each do |item|
       if item.include? '-' 
         selid_i = item.split('-').first.to_i
         selid_f = item.split('-').last.to_i
@@ -254,7 +251,7 @@ def delete
     marked_for_deletion.each do |id|
       code1 = `btrfs subvolume delete #{@snapdir}/#{id}/data; echo $?`.to_i
       code2 = `rm -r #{@snapdir}/#{id}; echo $?`.to_i 
-      if code1+code2 > 0 then puts "FAILED deleting snapshot '#{id}'." end
+      if code1.abs+code2.abs > 0 then puts "FAILED deleting snapshot '#{id}'." end
     end
   else #if choosed N
     puts "ABORTED."
@@ -262,7 +259,7 @@ def delete
 end
 #==========================
 def repack
-  puts "Renumbering snapshot IDs..."
+  puts "Repacking snapshots..."
   path = @snapdir+'/'
   snapid.each.with_index do |v,j|
     from = path+v.to_s
@@ -282,7 +279,7 @@ def prune
     unless readinfo(id)[4]=='1'
       code1 = `btrfs subvolume delete #{@snapdir}/#{id}/data; echo $?`.to_i\
       code2 =  `rm -r #{@snapdir}/#{id}; echo $?`.to_i 
-      if code1+code2 > 0 
+      if code1.abs+code2.abs > 0 
         puts "FAILED deleting snapshot '#{id}'." 
       else
         puts "Deleted snapshot '#{id}'."
@@ -328,13 +325,12 @@ if opt.include? 'snapshot'
   snapshot(ARGV[1],keep,false,)
 end
 #-----------------------------------
-
 if opt == 'list'
   list
 end
 #-----------------------------------
 if opt == 'rollback'
-  warning = "The '#{@mnt}' folder should not exist. ABORTED."
+  warning = "The '#{@mnt}' folder shouldn't exist. ABORTED."
   if Dir.exists? @mnt then puts warning; abort end
   if ARGV[1].nil?
     list; rollback
@@ -343,7 +339,6 @@ if opt == 'rollback'
   end
 end
 #-----------------------------------
-
 if opt == 'delete'
   if ARGV[1].nil?
     list; delete
