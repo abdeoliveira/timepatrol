@@ -1,48 +1,54 @@
 #!/usr/bin/ruby
 require 'colorize'
-#===============
-@device = '/dev/mapper/root' 
-@snapdir = '/.snapshots'
-@snapvol = '@snapshots'
-@rootvol = '@root'
-@maxsnaps = 50
-#===============
+
+DEVICE = '/dev/mapper/root' 
+SNAPSHOTS_FOLDER = '/.snapshots'
+SNAPSHOTS_VOLUME = '@snapshots'
+ROOT_VOLUME = '@root'
+MAXIMUM_SNAPSHOTS = 50
+
+
 unless ENV['USER'] == 'root'
   puts "You should run as root. ABORTED."
   abort
 end
-#==========================
+
+
 def now
  Time.new.strftime "%Y.%m.%d;%H:%M:%S"
 end
-#==========================
+
+
 def letters
  return [*'a'..'z',*'A'..'Z']
 end
-#==========================
+
+
 def snapid
-  ids = `btrfs subvolume list / | grep #{@snapvol}/`
+  ids = `btrfs subvolume list / | grep #{SNAPSHOTS_VOLUME}/`
   id_list=[]
   ids.split("\n").each do |i|
     id_list<<i.split('/')[1].to_i
   end
   return id_list.sort
 end
-#==========================
+
+
 def snapshot(comm,keep,fake)
   id = snapid.last.to_i + 1
-  path = @snapdir + '/' + id.to_s
-  ker = `uname -r`.chomp
+  path = SNAPSHOTS_FOLDER + '/' + id.to_s
+  kernel = `uname -r`.chomp
   `mkdir #{path}`
   if comm.nil? then comm = '' end
   unless fake 
     puts `btrfs subvolume snapshot / #{path}/data` 
   end
   comm = comm.gsub(';','')
-  info = "#{now};#{comm};#{ker};#{keep}"
+  info = "#{now};#{comm};#{kernel};#{keep}"
   File.write("#{path}/info",info,mode:'w')
 end
-#==========================
+
+
 def splitstr(string,shift)
   max = 35
   line = ''
@@ -59,9 +65,10 @@ def splitstr(string,shift)
   end
   return line
 end
-#==========================
+
+
 def readinfo(id)
-  path = @snapdir + '/' + id.to_s
+  path = SNAPSHOTS_FOLDER + '/' + id.to_s
   unless Dir.exist? path then puts "There is no snapshot ID '#{id}'."; abort end
   info = File.read(path + '/info').strip.split(';')
   date  = info[0]
@@ -72,7 +79,8 @@ def readinfo(id)
   comm  = splitstr(desc,45)
   return [date,time,comm,kernel,keep]
 end
-#==========================
+
+
 def list
     title = "TIMEPATROL SNAPSHOTS"
     legend= ' '*3+"ID"\
@@ -124,7 +132,8 @@ def list
     puts line
     puts "TOTAL: #{snapid.length}".bold
 end
-#============================
+
+
 def rollback
   countdown = 10 # seconds before rebooting
   rollid = ARGV[1]
@@ -159,9 +168,9 @@ def rollback
   puts ":: ".blue.bold+"Confirm? [y/N]".bold
   
   if STDIN.gets.chomp == 'y' 
-    `mkdir #{@mnt} && mount -o subvolid=5 #{@device} #{@mnt}`
-    check_root = Dir.exists? @mnt+'/'+@rootvol
-    check_snap = Dir.exists? @mnt+'/'+@snapvol
+    `mkdir #{MOUNT_POINT} && mount -o subvolid=5 #{DEVICE} #{MOUNT_POINT}`
+    check_root = Dir.exists? MOUNT_POINT+'/'+ROOT_VOLUME
+    check_snap = Dir.exists? MOUNT_POINT+'/'+SNAPSHOTS_VOLUME
     unless check_root and check_snap
       puts "Mounting stage went wrong. ABORTED.".red
       abort
@@ -173,13 +182,13 @@ def rollback
     
     snapshot("pre rollback to [#{date} #{time}]",-1,true)
     
-    `mv #{@mnt}/#{@rootvol} #{@mnt}/#{@snapvol}/#{id}/data`
+    `mv #{MOUNT_POINT}/#{ROOT_VOLUME} #{MOUNT_POINT}/#{SNAPSHOTS_VOLUME}/#{id}/data`
     
-    `btrfs subvolume snapshot #{@mnt}/#{@snapvol}/#{rollid}/data #{@mnt}/#{@rootvol}`
+    `btrfs subvolume snapshot #{MOUNT_POINT}/#{SNAPSHOTS_VOLUME}/#{rollid}/data #{MOUNT_POINT}/#{ROOT_VOLUME}`
     
-    `umount #{@mnt} && rm -r #{@mnt}`
+    `umount #{MOUNT_POINT} && rm -r #{MOUNT_POINT}`
     
-    root_id = `btrfs subvolume list / | grep #{@rootvol}`.split(' ')[1].to_i
+    root_id = `btrfs subvolume list / | grep #{ROOT_VOLUME}`.split(' ')[1].to_i
     
     `btrfs subvolume set-default #{root_id} /`
     
@@ -201,10 +210,9 @@ def showinfo(id)
   date = readinfo(id)[0]
   time = readinfo(id)[1]
   comm = readinfo(id)[2]
-  ker = readinfo(id)[3]
-  nd = id.to_s.length
-  space = " "*(3-nd)
-  "#{space} [#{id}] #{date} #{time} #{ker} #{comm}" 
+  kernel = readinfo(id)[3]
+  space = " "*(3 - id.to_s.length)
+  "#{space} [#{id}] #{date} #{time} #{kernel} #{comm}" 
 end
 
 
@@ -275,8 +283,8 @@ def delete
   if ans == 'y' 
     puts "Confirmed."
     marked_for_deletion.each do |id|
-      code1 = `btrfs subvolume delete #{@snapdir}/#{id}/data; echo $?`.to_i
-      code2 = `rm -r #{@snapdir}/#{id}; echo $?`.to_i 
+      code1 = `btrfs subvolume delete #{SNAPSHOTS_FOLDER}/#{id}/data; echo $?`.to_i
+      code2 = `rm -r #{SNAPSHOTS_FOLDER}/#{id}; echo $?`.to_i 
       if code1.abs+code2.abs > 0 then puts "FAILED deleting snapshot '#{id}'." end
     end
   else #if choosed N
@@ -287,7 +295,7 @@ end
 
 def repack
   puts "Repacking snapshots...".bold
-  path = @snapdir+'/'
+  path = SNAPSHOTS_FOLDER+'/'
   snapid.each.with_index do |v,j|
     from = path+v.to_s
     to = path+(j+1).to_s
@@ -301,13 +309,13 @@ end
 
 def prune
   count = 0
-  maxdel = snapid.length+1 - @maxsnaps
+  maxdel = snapid.length+1 - MAXIMUM_SNAPSHOTS
   snapid.each do |id|
     if count == maxdel then break end
     unless readinfo(id)[4]=='1'
-      code1 = `btrfs subvolume delete #{@snapdir}/#{id}/data; echo $?`.to_i\
-      code2 =  `rm -r #{@snapdir}/#{id}; echo $?`.to_i 
-      if code1.abs+code2.abs > 0 
+      code1 = `btrfs subvolume delete #{SNAPSHOTS_FOLDER}/#{id}/data; echo $?`.to_i
+      code2 = `rm -r #{SNAPSHOTS_FOLDER}/#{id}; echo $?`.to_i 
+      if code1.abs + code2.abs > 0 
         puts "FAILED deleting snapshot '#{id}'." 
       else
         puts "Deleted snapshot '#{id}'."
@@ -321,7 +329,7 @@ end
 def mark
   marked_for_toggle = select('toggle KEEP'.green.bold)
     marked_for_toggle.each do |id|
-      file    = @snapdir+'/'+id.to_s+'/info' 
+      file    = SNAPSHOTS_FOLDER+'/'+id.to_s+'/info' 
       date    = readinfo(id)[0]
       time    = readinfo(id)[1]
       comm    = readinfo(id)[2]
@@ -335,7 +343,7 @@ end
 
 opt = ARGV[0]
 if opt.nil? then opt = 'help' end
-@mnt = '/mnt/timepatroltmp'
+MOUNT_POINT = '/mnt/timepatroltmp'
 
 
 if opt == 'toggle-keep'
@@ -351,7 +359,7 @@ if opt.include? 'snapshot'
   keep = 0
   if opt == 'snapshot-keep' then keep = 1 end 
   if snapid.last > 900 then repack end
-  if snapid.length >= @maxsnaps then prune end
+  if snapid.length >= MAXIMUM_SNAPSHOTS then prune end
   snapshot(ARGV[1],keep,false,)
 end
 
@@ -362,8 +370,8 @@ end
 
 
 if opt == 'rollback'
-  warning = "The '#{@mnt}' folder shouldn't exist. ABORTED.".bold
-  if Dir.exists? @mnt then puts warning; abort end
+  warning = "The '#{MOUNT_POINT}' folder shouldn't exist. ABORTED.".bold
+  if Dir.exists? MOUNT_POINT then puts warning; abort end
   if ARGV[1].nil?
     list; rollback
   else
