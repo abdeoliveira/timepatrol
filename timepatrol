@@ -5,7 +5,7 @@ require 'colorize'
 @snapdir = '/.snapshots'
 @snapvol = '@snapshots'
 @rootvol = '@root'
-@maxsnaps = 100
+@maxsnaps = 50
 #===============
 unless ENV['USER'] == 'root'
   puts "You should run as root. ABORTED."
@@ -75,8 +75,8 @@ end
 #==========================
 def list
     title = "TIMEPATROL SNAPSHOTS"
-    legend= ' '*4+"ID"\
-      +' '*2+"DATE"\
+    legend= ' '*3+"ID"\
+      +' '*3+"DATE"\
       +' '*8+"TIME"\
       +' '*6+"KERNEL"\
       +' '*9+"COMMENT"
@@ -122,18 +122,23 @@ def rollback
   countdown = 10 # seconds before rebooting
   rollid = ARGV[1]
   if rollid.nil?
-   puts "Choose a snapshot ID to rollback to or type any letter to ABORT:"
+    puts ":: ".blue.bold+\
+ "Choose a snapshot ID to".bold+\
+ " rollback ".red.bold+\
+ "to or type any letter to ABORT:".bold
    rollid = STDIN.gets.strip
   end
+  if rollid.empty? then rollid = 'a' end
   if letters.include? rollid
-    puts 'ABORTED.'
+    puts 'ABORTED.'.bold
     abort
   end
   #----------------------
   kernel_from = `uname -r`.chomp 
   kernel_to = readinfo(rollid)[3]
   if kernel_from != kernel_to
-    puts "Running kernel (#{kernel_from}) is\
+    puts ":: ".blue.bold+\
+ "Running kernel (#{kernel_from}) is\
  different from snapshot '#{rollid}' kernel \
  (#{kernel_to}).\nABORTED.".red
     abort
@@ -242,9 +247,10 @@ end
 def delete
   marked_for_deletion = select('delete'.red.bold)
     marked_for_deletion.each do |id|
-      puts showinfo(id).cyan
+      puts showinfo(id).light_red
     end
-    puts "Confirm deletion of the selected snapshot(s) above? [y/N]".light_red
+    puts ":: ".blue.bold+\
+ "Confirm deletion of the selected snapshot(s) above? [y/N]".bold
     ans = STDIN.gets.chomp
   if ans == 'y' 
     puts "Confirmed."
@@ -307,7 +313,7 @@ end
 #==================================
 opt = ARGV[0]
 if opt.nil? then opt = 'help' end
-@mnt = '/mnt/tptmp'
+@mnt = '/mnt/timepatroltmp'
 #==================================
 if opt == 'toggle-keep'
   if ARGV[1].nil?
