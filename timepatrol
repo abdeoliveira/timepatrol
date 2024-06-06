@@ -80,32 +80,38 @@ def list
       +' '*8+"TIME"\
       +' '*6+"KERNEL"\
       +' '*9+"COMMENT"
+    
     tlhalf = title.length/2
     nline = 72
+    
     line = ("-".light_white)*nline
     lineline = ("=".light_white)*nline
+    
     puts lineline
     puts " "*(nline/2-tlhalf)+title.yellow.bold
     puts lineline
     puts legend.bold
+    
     snapid.each do |id|
+    
       date   = readinfo(id)[0]
       time   = readinfo(id)[1]
       comm   = readinfo(id)[2]
       kernel = readinfo(id)[3]
       keep   = readinfo(id)[4]
-      #--------------------
+      
       space = 4-id.to_s.size
       kspace = 15 - kernel.size
-      #--------------------
+      
       kk=''
       if keep == '1' then kk='*'.green.bold;space-=1 end
-      #--------------------
+      
       id = '['+id.to_s.light_white+']'
       date = date.light_white
       time = time.light_white
       comm = comm.light_white
       kernel = kernel.light_white
+      
       puts ' '*space\
         +kk+\
         +id+\
@@ -114,6 +120,7 @@ def list
         +' '*2+kernel\
         +' '*kspace+comm
     end
+    
     puts line
     puts "TOTAL: #{snapid.length}".bold
 end
@@ -121,6 +128,7 @@ end
 def rollback
   countdown = 10 # seconds before rebooting
   rollid = ARGV[1]
+  
   if rollid.nil?
     puts ":: ".blue.bold+\
  "Choose a snapshot ID to".bold+\
@@ -128,12 +136,14 @@ def rollback
  "to or type any letter to ABORT:".bold
    rollid = STDIN.gets.strip
   end
+
   if rollid.empty? then rollid = 'a' end
+
   if letters.include? rollid
-    puts 'ABORTED.'.bold
+    puts ":: ".blue.bold+'ABORTED.'.bold
     abort
   end
-  #----------------------
+  
   kernel_from = `uname -r`.chomp 
   kernel_to = readinfo(rollid)[3]
   if kernel_from != kernel_to
@@ -143,29 +153,36 @@ def rollback
  (#{kernel_to}).\nABORTED.".red
     abort
   end
-  #-----------------------
-  puts "Rolling back to the following snapshot:".light_red
+  
+  puts ":: ".blue.bold+"Rolling back to the following snapshot:".bold
   puts showinfo(rollid).cyan
-  puts "Confirm? [y/N]".light_red
+  puts ":: ".blue.bold+"Confirm? [y/N]".bold
+  
   if STDIN.gets.chomp == 'y' 
     `mkdir #{@mnt} && mount -o subvolid=5 #{@device} #{@mnt}`
-    #----------------
     check_root = Dir.exists? @mnt+'/'+@rootvol
     check_snap = Dir.exists? @mnt+'/'+@snapvol
     unless check_root and check_snap
       puts "Mounting stage went wrong. ABORTED.".red
       abort
     end
-  #----------------
+    
     id = snapid.last + 1
     date = readinfo(rollid)[0]
     time = readinfo(rollid)[1]
+    
     snapshot("pre rollback to [#{date} #{time}]",-1,true)
+    
     `mv #{@mnt}/#{@rootvol} #{@mnt}/#{@snapvol}/#{id}/data`
+    
     `btrfs subvolume snapshot #{@mnt}/#{@snapvol}/#{rollid}/data #{@mnt}/#{@rootvol}`
+    
     `umount #{@mnt} && rm -r #{@mnt}`
+    
     root_id = `btrfs subvolume list / | grep #{@rootvol}`.split(' ')[1].to_i
+    
     `btrfs subvolume set-default #{root_id} /`
+    
     puts "Confirmed. Rebooting in..."
       (countdown-1).times do |i| 
         puts countdown-=1
@@ -174,11 +191,12 @@ def rollback
       puts 'BUCKLE UP!'
       sleep 1
     `reboot`
-    else
-      puts "ABORTED."
-    end
+  else
+    puts ":: ".blue.bold+"ABORTED.".bold
+  end
 end
-#==================================
+
+
 def showinfo(id)
   date = readinfo(id)[0]
   time = readinfo(id)[1]
@@ -188,35 +206,34 @@ def showinfo(id)
   space = " "*(3-nd)
   "#{space} [#{id}] #{date} #{time} #{ker} #{comm}" 
 end
-#==================================
+
+
 def select(action)
-#-------------------------------
   selid = ARGV[1]
   array_selected = []
   keyword = ['date=','time=','comment=','kernel=','keep=']
+  
   if selid.nil?
     puts "Select snapshot(s) to #{action} or type any letter to ABORT:"
     selid = STDIN.gets.chomp
   end
+  
   if letters.include? selid 
     puts "ABORTED."
     abort
   end
-#---------------------------------
-  keyword.each do |k|
-    if selid.include? k then @special = true end
-  end
-#---------------------------------
-  5.times do |j|
-    snapid.each do |id|
-      string = readinfo(id)[j]
-      if string.include? selid.sub(keyword[j],'')
-        array_selected<<id
+  
+  keyword.map {|k| if selid.include? k then @special=true; break end}
+  if @special
+    5.times do |j|
+      snapid.each do |id|
+        string = readinfo(id)[j]
+        if string.include? selid.sub(keyword[j],'')
+          array_selected<<id
+        end
       end
     end
-  end
-#--------------------------------
-  unless @special
+  else
     selid.split(',').each do |item|
       if item.include? '-' 
         selid_i = item.split('-').first.to_i
@@ -236,18 +253,21 @@ def select(action)
       end
     end 
   end
-#-----------------------------
+  
   if array_selected.empty?
     puts "No snapshot meets the given criteria. ABORTED."
     abort
   end
+
   return array_selected
 end
-#==================================
+
+
+
 def delete
   marked_for_deletion = select('delete'.red.bold)
     marked_for_deletion.each do |id|
-      puts showinfo(id).light_red
+      puts showinfo(id).cyan
     end
     puts ":: ".blue.bold+\
  "Confirm deletion of the selected snapshot(s) above? [y/N]".bold
@@ -260,12 +280,13 @@ def delete
       if code1.abs+code2.abs > 0 then puts "FAILED deleting snapshot '#{id}'." end
     end
   else #if choosed N
-    puts "ABORTED."
+    puts ":: ".blue.bold+"ABORTED.".bold
   end
 end
-#==========================
+
+
 def repack
-  puts "Repacking snapshots..."
+  puts "Repacking snapshots...".bold
   path = @snapdir+'/'
   snapid.each.with_index do |v,j|
     from = path+v.to_s
@@ -276,7 +297,8 @@ def repack
     end
   end
 end
-#==========================
+
+
 def prune
   count = 0
   maxdel = snapid.length+1 - @maxsnaps
@@ -294,7 +316,8 @@ def prune
     end
   end
 end
-#==========================
+
+
 def mark
   marked_for_toggle = select('toggle KEEP'.green.bold)
     marked_for_toggle.each do |id|
@@ -308,13 +331,13 @@ def mark
       File.write(file,info,mode:'w')
     end
 end
-#==================================
-#==================================
-#==================================
+
+
 opt = ARGV[0]
 if opt.nil? then opt = 'help' end
 @mnt = '/mnt/timepatroltmp'
-#==================================
+
+
 if opt == 'toggle-keep'
   if ARGV[1].nil?
     list; mark
@@ -322,7 +345,8 @@ if opt == 'toggle-keep'
     mark
   end
 end
-#-----------------------------------
+
+
 if opt.include? 'snapshot'
   keep = 0
   if opt == 'snapshot-keep' then keep = 1 end 
@@ -330,13 +354,15 @@ if opt.include? 'snapshot'
   if snapid.length >= @maxsnaps then prune end
   snapshot(ARGV[1],keep,false,)
 end
-#-----------------------------------
+
+
 if opt == 'list'
   list
 end
-#-----------------------------------
+
+
 if opt == 'rollback'
-  warning = "The '#{@mnt}' folder shouldn't exist. ABORTED."
+  warning = "The '#{@mnt}' folder shouldn't exist. ABORTED.".bold
   if Dir.exists? @mnt then puts warning; abort end
   if ARGV[1].nil?
     list; rollback
@@ -344,7 +370,8 @@ if opt == 'rollback'
     rollback
   end
 end
-#-----------------------------------
+
+
 if opt == 'delete'
   if ARGV[1].nil?
     list; delete
@@ -352,12 +379,14 @@ if opt == 'delete'
     delete
   end
 end
-#-----------------------------------
+
+
 if opt == 'help' 
   puts 'USAGE:    timepatrol [COMMAND]'
   puts '------------------------------'
   puts 'COMMANDS:'
   puts "          snapshot 'COMMENT'"
+  puts "          snapshot-keep 'COMMENT'"
   puts "          toggle-keep"
   puts '          delete'
   puts '          rollback'
