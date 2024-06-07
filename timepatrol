@@ -7,13 +7,6 @@ SNAPSHOTS_VOLUME = '@snapshots'
 ROOT_VOLUME = '@root'
 MAXIMUM_SNAPSHOTS = 50
 
-
-unless ENV['USER'] == 'root'
-  puts "You should run as root. ABORTED."
-  abort
-end
-
-
 def now
  Time.new.strftime "%Y.%m.%d;%H:%M:%S"
 end
@@ -41,7 +34,7 @@ def snapshot(comm,keep,fake)
   `mkdir #{path}`
   if comm.nil? then comm = '' end
   unless fake 
-    puts `btrfs subvolume snapshot / #{path}/data` 
+    puts `btrfs subvolume snapshot / #{path}/data`
   end
   comm = comm.gsub(';','')
   info = "#{now};#{comm};#{kernel};#{keep}"
@@ -69,7 +62,7 @@ end
 
 def readinfo(id)
   path = SNAPSHOTS_FOLDER + '/' + id.to_s
-  unless Dir.exist? path then puts "There is no snapshot ID '#{id}'."; abort end
+  unless Dir.exist? path then puts format_message("There is no snapshot ID [#{id}].",1); abort end
   info = File.read(path + '/info').strip.split(';')
   date  = info[0]
   time  = info[1]
@@ -81,7 +74,8 @@ def readinfo(id)
 end
 
 
-def list
+def list(print_message)
+    
     title = "TIMEPATROL SNAPSHOTS"
     legend= ' '*3+"ID"\
       +' '*3+"DATE"\
@@ -131,48 +125,37 @@ def list
     
     puts line
     puts "TOTAL: #{snapid.length}".bold
+    
+    if print_message 
+      puts format_message("Select a snapshot to rollback to or type any letter to ABORT:",0)
+    end
+
 end
 
 
 def rollback
   countdown = 10 # seconds before rebooting
-  rollid = ARGV[1]
-  
-  if rollid.nil?
-    puts ":: ".blue.bold+\
- "Choose a snapshot ID to".bold+\
- " rollback ".red.bold+\
- "to or type any letter to ABORT:".bold
-   rollid = STDIN.gets.strip
-  end
-
-  if rollid.empty? then rollid = 'a' end
-
-  if letters.include? rollid
-    puts ":: ".blue.bold+'ABORTED.'.bold
-    abort
-  end
-  
+  rollid = @array_selected.first 
   kernel_from = `uname -r`.chomp 
   kernel_to = readinfo(rollid)[3]
+ 
+  if @array_selected.length != 1 then puts format_message("You must choose a single ID. ABORTED.",1);abort end
+
   if kernel_from != kernel_to
-    puts ":: ".blue.bold+\
- "Running kernel (#{kernel_from}) is\
- different from snapshot '#{rollid}' kernel \
- (#{kernel_to}).\nABORTED.".red
+    puts format_message("Running kernel (#{kernel_from}) is different from snapshot [#{rollid}] kernel. ABORTED.",1)
     abort
   end
   
-  puts ":: ".blue.bold+"Rolling back to the following snapshot:".bold
+  puts format_message("Rolling back to the following snapshot:",0)
   puts showinfo(rollid).cyan
-  puts ":: ".blue.bold+"Confirm? [y/N]".bold
+  puts format_message("Confirm? [y/N]",2)
   
   if STDIN.gets.chomp == 'y' 
     `mkdir #{MOUNT_POINT} && mount -o subvolid=5 #{DEVICE} #{MOUNT_POINT}`
     check_root = Dir.exists? MOUNT_POINT+'/'+ROOT_VOLUME
     check_snap = Dir.exists? MOUNT_POINT+'/'+SNAPSHOTS_VOLUME
     unless check_root and check_snap
-      puts "Mounting stage went wrong. ABORTED.".red
+      puts format_message("Mounting stage went wrong. ABORTED.",1)
       abort
     end
     
@@ -200,8 +183,9 @@ def rollback
       puts 'BUCKLE UP!'
       sleep 1
     `reboot`
+  
   else
-    puts ":: ".blue.bold+"ABORTED.".bold
+    puts format_message('ABORTED.',1)
   end
 end
 
@@ -216,20 +200,9 @@ def showinfo(id)
 end
 
 
-def select(action)
-  selid = ARGV[1]
+def select(selid)
   array_selected = []
   keyword = ['date=','time=','comment=','kernel=','keep=']
-  
-  if selid.nil?
-    puts "Select snapshot(s) to #{action} or type any letter to ABORT:"
-    selid = STDIN.gets.chomp
-  end
-  
-  if letters.include? selid 
-    puts "ABORTED."
-    abort
-  end
   
   keyword.map {|k| if selid.include? k then @special=true; break end}
   if @special
@@ -247,7 +220,7 @@ def select(action)
         selid_i = item.split('-').first.to_i
         selid_f = item.split('-').last.to_i
         if selid_i >= selid_f 
-          puts "Bad range. ABORTED."
+          puts format_message("Bad range. ABORTED.",1)
           abort 
         end
         snapid.each do |id|
@@ -263,47 +236,53 @@ def select(action)
   end
   
   if array_selected.empty?
-    puts "No snapshot meets the given criteria. ABORTED."
+    puts format_message("No snapshot meets the given criteria. ABORTED.",1)
     abort
   end
 
-  return array_selected
+  return @array_selected = array_selected
 end
 
 
 
 def delete
-  marked_for_deletion = select('delete'.red.bold)
-    marked_for_deletion.each do |id|
+  
+  @array_selected.each do |id|
       puts showinfo(id).cyan
-    end
-    puts ":: ".blue.bold+\
- "Confirm deletion of the selected snapshot(s) above? [y/N]".bold
-    ans = STDIN.gets.chomp
+  end
+
+  puts format_message("Confirm deletion of the selected snapshot(s) above? [y/N]",2)
+  ans = STDIN.gets.chomp
+  
   if ans == 'y' 
     puts "Confirmed."
-    marked_for_deletion.each do |id|
+    @array_selected.each do |id|
       code1 = `btrfs subvolume delete #{SNAPSHOTS_FOLDER}/#{id}/data; echo $?`.to_i
       code2 = `rm -r #{SNAPSHOTS_FOLDER}/#{id}; echo $?`.to_i 
       if code1.abs+code2.abs > 0 then puts "FAILED deleting snapshot '#{id}'." end
     end
   else #if choosed N
-    puts ":: ".blue.bold+"ABORTED.".bold
+    puts format_message('ABORTED.',1)
   end
+
 end
 
 
 def repack
   puts "Repacking snapshots...".bold
   path = SNAPSHOTS_FOLDER+'/'
+  
   snapid.each.with_index do |v,j|
     from = path+v.to_s
     to = path+(j+1).to_s
+
     if from != to
       `mv #{from} #{to}`
       puts "#{v} --> #{j+1}"
     end
+
   end
+
 end
 
 
@@ -312,23 +291,26 @@ def prune
   maxdel = snapid.length+1 - MAXIMUM_SNAPSHOTS
   snapid.each do |id|
     if count == maxdel then break end
+    
     unless readinfo(id)[4]=='1'
       code1 = `btrfs subvolume delete #{SNAPSHOTS_FOLDER}/#{id}/data; echo $?`.to_i
       code2 = `rm -r #{SNAPSHOTS_FOLDER}/#{id}; echo $?`.to_i 
+  
       if code1.abs + code2.abs > 0 
         puts "FAILED deleting snapshot '#{id}'." 
       else
         puts "Deleted snapshot '#{id}'."
         count+=1
       end
+  
     end
+  
   end
 end
 
 
 def mark
-  marked_for_toggle = select('toggle KEEP'.green.bold)
-    marked_for_toggle.each do |id|
+  @array_selected.each do |id|
       file    = SNAPSHOTS_FOLDER+'/'+id.to_s+'/info' 
       date    = readinfo(id)[0]
       time    = readinfo(id)[1]
@@ -337,22 +319,28 @@ def mark
       keep    = (-readinfo(id)[4].to_i+2)/2
       info = date+';'+time+';'+comm+';'+kernel+';'+keep.to_s
       File.write(file,info,mode:'w')
-    end
+  end
+end
+
+
+def format_message(message,mode)
+  if mode == 0 then sign = ":: ".blue.bold end
+  if mode == 1 then sign = ":: ".red.bold end
+  if mode == 2 then sign = ":: ".yellow.bold end
+  return sign+message.bold
+end
+
+
+unless ENV['USER'] == 'root'
+  puts format_message("You should run as root. ABORTED.",1)
+  abort
 end
 
 
 opt = ARGV[0]
+selid = ARGV[1]
 if opt.nil? then opt = 'help' end
 MOUNT_POINT = '/mnt/timepatroltmp'
-
-
-if opt == 'toggle-keep'
-  if ARGV[1].nil?
-    list; mark
-  else
-    mark
-  end
-end
 
 
 if opt.include? 'snapshot'
@@ -360,32 +348,47 @@ if opt.include? 'snapshot'
   if opt == 'snapshot-keep' then keep = 1 end 
   if snapid.last > 900 then repack end
   if snapid.length >= MAXIMUM_SNAPSHOTS then prune end
-  snapshot(ARGV[1],keep,false,)
+  snapshot(selid,keep,false,)
 end
 
 
 if opt == 'list'
-  list
+  list(false)
 end
 
 
 if opt == 'rollback'
-  warning = "The '#{MOUNT_POINT}' folder shouldn't exist. ABORTED.".bold
-  if Dir.exists? MOUNT_POINT then puts warning; abort end
-  if ARGV[1].nil?
-    list; rollback
-  else
-    rollback
+  warning = "The '#{MOUNT_POINT}' folder shouldn't exist. ABORTED."
+  if Dir.exists? MOUNT_POINT then puts format_message(warning,1); abort end
+  if selid.nil?
+    list(true)
+    #puts format_message("Select a snapshot to rollback to or type any letter to ABORT:",0)
+    selid = STDIN.gets.chomp
+    if letters.include? selid then puts format_message("ABORTED.",1); abort  end
   end
+    select(selid); rollback
 end
 
 
 if opt == 'delete'
-  if ARGV[1].nil?
-    list; delete
-  else 
-    delete
+  if selid.nil?
+    list(true)
+    #puts format_message("Select snapshot(s) to delete or type any letter to ABORT:",0)
+    selid = STDIN.gets.chomp
+    if letters.include? selid then puts format_message("ABORTED.",1); abort  end
   end
+  select(selid); delete
+end
+
+
+if opt == 'toggle-keep'
+  if selid.nil?
+    list(true)
+    #puts format_message("Select snapshot(s) to toogle keep or type any letter to ABORT:",0)
+    selid = STDIN.gets.chomp
+    if letters.include? selid then puts format_message("ABORTED.",1); abort  end
+  end
+  select(selid); mark
 end
 
 
