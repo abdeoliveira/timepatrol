@@ -300,7 +300,7 @@ def prune
       if code1.abs + code2.abs > 0 
         puts "FAILED deleting snapshot '#{id}'." 
       else
-        puts "Deleted snapshot '#{id}'."
+        puts "Deleted snapshot [#{id}]."
         count+=1
       end
   
@@ -335,8 +335,7 @@ def basic_check_root_subvol
   list = `btrfs subvolume list / | grep #{ROOT_VOLUME}`
   if list.split("\n").length != 1 
     puts format_message("Grep root subvolume\
- (#{ROOT_VOLUME}) returns many entries.\n   Try to use '@root' for example.\
- ABORTED.",1)
+ (#{ROOT_VOLUME}) returns many entries while is expected one. ABORTED.",1)
   abort
   end
 end
