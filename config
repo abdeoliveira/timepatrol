@@ -1,0 +1,6 @@
+DEVICE = '/dev/mapper/root' 
+SNAPSHOTS_FOLDER = '/.snapshots'
+SNAPSHOTS_VOLUME = '@snapshots'
+ROOT_VOLUME = '@root'
+MAXIMUM_SNAPSHOTS = 20
+MOUNT_POINT = '/mnt/timepatroltmp'

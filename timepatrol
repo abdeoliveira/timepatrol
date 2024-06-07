@@ -1,12 +1,6 @@
 #!/usr/bin/ruby
 require 'colorize'
-
-DEVICE = '/dev/mapper/root' 
-SNAPSHOTS_FOLDER = '/.snapshots'
-SNAPSHOTS_VOLUME = '@snapshots'
-ROOT_VOLUME = '@root'
-MAXIMUM_SNAPSHOTS = 20
-
+load '/etc/timepatrol/config'
 
 
 def now
@@ -170,7 +164,6 @@ def rollback
     id = snapid.last + 1
     date = readinfo(rollid)[0]
     time = readinfo(rollid)[1]
-    
     snapshot("pre rollback to [#{date} #{time}]",0,true)
     
     `mv #{MOUNT_POINT}/#{ROOT_VOLUME} #{MOUNT_POINT}/#{SNAPSHOTS_VOLUME}/#{id}/data`
@@ -204,7 +197,7 @@ def showinfo(id)
   comm = readinfo(id)[2]
   kernel = readinfo(id)[3]
   space = " "*(3 - id.to_s.length)
-  "#{space} [#{id}] #{date} #{time} #{kernel} #{comm}" 
+  return "#{space} [#{id}] #{date} #{time} #{kernel} #{comm}" 
 end
 
 
@@ -359,7 +352,6 @@ basic_check_root_subvol
 opt = ARGV[0]
 selid = ARGV[1]
 if opt.nil? then opt = 'help' end
-MOUNT_POINT = '/mnt/timepatroltmp'
 
 
 if opt.include? 'snapshot'
@@ -377,8 +369,8 @@ end
 
 
 if opt == 'rollback'
-  mnt_point_message = "The '#{MOUNT_POINT}' folder shouldn't exist. ABORTED."
-  if Dir.exists? MOUNT_POINT then puts format_message(mnt_point_message,1); abort end
+  if Dir.exists? MOUNT_POINT then puts format_message("The '#{MOUNT_POINT}'\
+ folder shouldn't exist. ABORTED.",1); abort end
   if selid.nil?
     list(opt)
     selid = STDIN.gets.chomp
