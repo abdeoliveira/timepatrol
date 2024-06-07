@@ -5,15 +5,20 @@ DEVICE = '/dev/mapper/root'
 SNAPSHOTS_FOLDER = '/.snapshots'
 SNAPSHOTS_VOLUME = '@snapshots'
 ROOT_VOLUME = '@root'
-MAXIMUM_SNAPSHOTS = 50
+MAXIMUM_SNAPSHOTS = 20
+
+
 
 def now
  Time.new.strftime "%Y.%m.%d;%H:%M:%S"
 end
 
 
-def letters
- return [*'a'..'z',*'A'..'Z']
+def if_letter_then_abort(selid)
+  if [*'a'..'z',*'A'..'Z'].include? selid
+    puts format_message("ABORTED.",1)
+    abort
+  end
 end
 
 
@@ -33,9 +38,7 @@ def snapshot(comm,keep,fake)
   kernel = `uname -r`.chomp
   `mkdir #{path}`
   if comm.nil? then comm = '' end
-  unless fake 
-    puts `btrfs subvolume snapshot / #{path}/data`
-  end
+  unless fake then puts `btrfs subvolume snapshot / #{path}/data` end
   comm = comm.gsub(';','')
   info = "#{now};#{comm};#{kernel};#{keep}"
   File.write("#{path}/info",info,mode:'w')
@@ -62,7 +65,8 @@ end
 
 def readinfo(id)
   path = SNAPSHOTS_FOLDER + '/' + id.to_s
-  unless Dir.exist? path then puts format_message("There is no snapshot ID [#{id}].",1); abort end
+  unless Dir.exist? path then puts format_message("There is\
+ no snapshot ID [#{id}].",1); abort end
   info = File.read(path + '/info').strip.split(';')
   date  = info[0]
   time  = info[1]
@@ -74,8 +78,7 @@ def readinfo(id)
 end
 
 
-def list(print_message)
-    
+def list(opt)
     title = "TIMEPATROL SNAPSHOTS"
     legend= ' '*3+"ID"\
       +' '*3+"DATE"\
@@ -102,10 +105,10 @@ def list(print_message)
       kernel = readinfo(id)[3]
       keep   = readinfo(id)[4]
       
-      space = 4-id.to_s.size
+      space = 4 - id.to_s.size
       kspace = 15 - kernel.size
       
-      kk=''
+      kk = ''
       if keep == '1' then kk='*'.green.bold;space-=1 end
       
       id = '['+id.to_s.light_white+']'
@@ -122,27 +125,32 @@ def list(print_message)
         +' '*2+kernel\
         +' '*kspace+comm
     end
-    
     puts line
     puts "TOTAL: #{snapid.length}".bold
     
-    if print_message 
-      puts format_message("Select a snapshot to rollback to or type any letter to ABORT:",0)
+    unless opt=='list' 
+      if opt == 'rollback' then opt += ' to' end
+      opt = opt.magenta
+      puts format_message("Select a snapshot to #{opt}\
+ or type any letter to ABORT:",0)
     end
 
 end
 
 
 def rollback
+  
+  if @array_selected.length != 1 then puts format_message("You\
+ must choose a single ID. ABORTED.",1);abort end
+
   countdown = 10 # seconds before rebooting
   rollid = @array_selected.first 
   kernel_from = `uname -r`.chomp 
   kernel_to = readinfo(rollid)[3]
- 
-  if @array_selected.length != 1 then puts format_message("You must choose a single ID. ABORTED.",1);abort end
 
   if kernel_from != kernel_to
-    puts format_message("Running kernel (#{kernel_from}) is different from snapshot [#{rollid}] kernel. ABORTED.",1)
+    puts format_message("Running kernel (#{kernel_from}) is\
+ different from snapshot [#{rollid}] kernel. ABORTED.",1)
     abort
   end
   
@@ -163,7 +171,7 @@ def rollback
     date = readinfo(rollid)[0]
     time = readinfo(rollid)[1]
     
-    snapshot("pre rollback to [#{date} #{time}]",-1,true)
+    snapshot("pre rollback to [#{date} #{time}]",0,true)
     
     `mv #{MOUNT_POINT}/#{ROOT_VOLUME} #{MOUNT_POINT}/#{SNAPSHOTS_VOLUME}/#{id}/data`
     
@@ -175,7 +183,7 @@ def rollback
     
     `btrfs subvolume set-default #{root_id} /`
     
-    puts "Confirmed. Rebooting in..."
+    puts format_message("Confirmed. Rebooting in...",0)
       (countdown-1).times do |i| 
         puts countdown-=1
         sleep 1
@@ -255,7 +263,7 @@ def delete
   ans = STDIN.gets.chomp
   
   if ans == 'y' 
-    puts "Confirmed."
+    puts format_message("Confirmed.",0)
     @array_selected.each do |id|
       code1 = `btrfs subvolume delete #{SNAPSHOTS_FOLDER}/#{id}/data; echo $?`.to_i
       code2 = `rm -r #{SNAPSHOTS_FOLDER}/#{id}; echo $?`.to_i 
@@ -311,23 +319,33 @@ end
 
 def mark
   @array_selected.each do |id|
-      file    = SNAPSHOTS_FOLDER+'/'+id.to_s+'/info' 
-      date    = readinfo(id)[0]
-      time    = readinfo(id)[1]
-      comm    = readinfo(id)[2]
-      kernel  = readinfo(id)[3]
-      keep    = (-readinfo(id)[4].to_i+2)/2
-      info = date+';'+time+';'+comm+';'+kernel+';'+keep.to_s
-      File.write(file,info,mode:'w')
+    file    = SNAPSHOTS_FOLDER+'/'+id.to_s+'/info' 
+    date    = readinfo(id)[0]
+    time    = readinfo(id)[1]
+    comm    = readinfo(id)[2]
+    kernel  = readinfo(id)[3]
+    keep    = (-readinfo(id)[4].to_i+2)/2
+    info = date+';'+time+';'+comm+';'+kernel+';'+keep.to_s
+    File.write(file,info,mode:'w')
   end
 end
 
 
 def format_message(message,mode)
-  if mode == 0 then sign = ":: ".blue.bold end
-  if mode == 1 then sign = ":: ".red.bold end
-  if mode == 2 then sign = ":: ".yellow.bold end
+  if mode == 0 then sign = ":: ".blue.bold end #Informative
+  if mode == 1 then sign = ":: ".red.bold end #Aborted
+  if mode == 2 then sign = ":: ".yellow.bold end #User decision
   return sign+message.bold
+end
+
+def basic_check_root_subvol 
+  list = `btrfs subvolume list / | grep #{ROOT_VOLUME}`
+  if list.split("\n").length != 1 
+    puts format_message("Grep root subvolume\
+ (#{ROOT_VOLUME}) returns many entries.\n   Try to use '@root' for example.\
+ ABORTED.",1)
+  abort
+  end
 end
 
 
@@ -336,6 +354,7 @@ unless ENV['USER'] == 'root'
   abort
 end
 
+basic_check_root_subvol
 
 opt = ARGV[0]
 selid = ARGV[1]
@@ -348,23 +367,22 @@ if opt.include? 'snapshot'
   if opt == 'snapshot-keep' then keep = 1 end 
   if snapid.last > 900 then repack end
   if snapid.length >= MAXIMUM_SNAPSHOTS then prune end
-  snapshot(selid,keep,false,)
+  snapshot(selid,keep,false)
 end
 
 
 if opt == 'list'
-  list(false)
+  list(opt)
 end
 
 
 if opt == 'rollback'
-  warning = "The '#{MOUNT_POINT}' folder shouldn't exist. ABORTED."
-  if Dir.exists? MOUNT_POINT then puts format_message(warning,1); abort end
+  mnt_point_message = "The '#{MOUNT_POINT}' folder shouldn't exist. ABORTED."
+  if Dir.exists? MOUNT_POINT then puts format_message(mnt_point_message,1); abort end
   if selid.nil?
-    list(true)
-    #puts format_message("Select a snapshot to rollback to or type any letter to ABORT:",0)
+    list(opt)
     selid = STDIN.gets.chomp
-    if letters.include? selid then puts format_message("ABORTED.",1); abort  end
+    if_letter_then_abort(selid) 
   end
     select(selid); rollback
 end
@@ -372,10 +390,9 @@ end
 
 if opt == 'delete'
   if selid.nil?
-    list(true)
-    #puts format_message("Select snapshot(s) to delete or type any letter to ABORT:",0)
+    list(opt)
     selid = STDIN.gets.chomp
-    if letters.include? selid then puts format_message("ABORTED.",1); abort  end
+    if_letter_then_abort(selid)
   end
   select(selid); delete
 end
@@ -383,10 +400,9 @@ end
 
 if opt == 'toggle-keep'
   if selid.nil?
-    list(true)
-    #puts format_message("Select snapshot(s) to toogle keep or type any letter to ABORT:",0)
+    list(opt)
     selid = STDIN.gets.chomp
-    if letters.include? selid then puts format_message("ABORTED.",1); abort  end
+    if_letter_then_abort(selid)
   end
   select(selid); mark
 end
