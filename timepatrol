@@ -270,7 +270,7 @@ end
 
 
 def repack
-  puts "Repacking snapshots...".bold
+  puts format_message("Repacking snapshots...",0)
   path = SNAPSHOTS_FOLDER+'/'
   
   snapid.each.with_index do |v,j|
@@ -298,9 +298,9 @@ def prune
       code2 = `rm -r #{SNAPSHOTS_FOLDER}/#{id}; echo $?`.to_i 
   
       if code1.abs + code2.abs > 0 
-        puts "FAILED deleting snapshot '#{id}'." 
+        puts format_message("FAILED pruning snapshot [#{id}]. ABORTED.",1)
       else
-        puts "Deleted snapshot [#{id}]."
+        puts format_message("pruning snapshot [#{id}].",0)
         count+=1
       end
   
@@ -331,12 +331,13 @@ def format_message(message,mode)
   return sign+message.bold
 end
 
+
 def basic_check_root_subvol 
   list = `btrfs subvolume list / | grep #{ROOT_VOLUME}`
   if list.split("\n").length != 1 
     puts format_message("Grep root subvolume\
  (#{ROOT_VOLUME}) returns many entries while it is expected one. ABORTED.",1)
-  abort
+    abort
   end
 end
 
