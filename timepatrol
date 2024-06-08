@@ -73,7 +73,7 @@ end
 
 
 def list(opt)
-    title = "TIMEPATROL SNAPSHOTS"
+    title = ":: TIMEPATROL SNAPSHOTS ::"
     legend= ' '*3+"ID"\
       +' '*3+"DATE"\
       +' '*8+"TIME"\
@@ -260,7 +260,7 @@ def delete
     @array_selected.each do |id|
       code1 = `btrfs subvolume delete #{SNAPSHOTS_FOLDER}/#{id}/data; echo $?`.to_i
       code2 = `rm -r #{SNAPSHOTS_FOLDER}/#{id}; echo $?`.to_i 
-      if code1.abs+code2.abs > 0 then puts "FAILED deleting snapshot '#{id}'." end
+      if code1.abs+code2.abs > 0 then puts "FAILED deleting snapshot [#{id}]." end
     end
   else #if choosed N
     puts format_message('ABORTED.',1)
@@ -289,7 +289,7 @@ end
 
 def prune
   count = 0
-  maxdel = snapid.length+1 - MAXIMUM_SNAPSHOTS
+  maxdel = snapid.length + 1 - MAXIMUM_SNAPSHOTS
   snapid.each do |id|
     if count == maxdel then break end
     
@@ -335,7 +335,7 @@ def basic_check_root_subvol
   list = `btrfs subvolume list / | grep #{ROOT_VOLUME}`
   if list.split("\n").length != 1 
     puts format_message("Grep root subvolume\
- (#{ROOT_VOLUME}) returns many entries while is expected one. ABORTED.",1)
+ (#{ROOT_VOLUME}) returns many entries while it is expected one. ABORTED.",1)
   abort
   end
 end
