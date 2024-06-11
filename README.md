@@ -2,8 +2,8 @@
 ## BTRFS snapshot manager and rollback tool 
 
 ## Dependencies
-* ruby
-* gem 'colorize' (install with sudo, not --user-install) 
+* `ruby`
+* `gem colorize` (installed as root, **not** `--user-install`) 
 
 ## Installation
 
