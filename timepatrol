@@ -293,10 +293,10 @@ def prune
   count = 0
   keep_count = 0
   snapid.map{ |id| if readinfo(id)[4]=='1' then keep_count+=1 end }
-  maxdel = 1 + snapid.length - (MAXIMUM_SNAPSHOTS + keep_count)
+  maxdel = snapid.length - (MAXIMUM_SNAPSHOTS + keep_count)
   
   snapid.each do |id|
-    if count == maxdel then break end
+    if count >= maxdel then break end
     unless readinfo(id)[4]=='1'
       code1 = `btrfs subvolume delete #{SNAPSHOTS_FOLDER}/#{id}/data; echo $?`.to_i
       code2 = `rm -r #{SNAPSHOTS_FOLDER}/#{id}; echo $?`.to_i 
@@ -358,9 +358,9 @@ if opt.nil? then opt = 'help' end
 if opt.include? 'snapshot'
   keep = 0
   if opt == 'snapshot-keep' then keep = 1 end 
-  if snapid.last > 900 then repack end
-  if snapid.length >= MAXIMUM_SNAPSHOTS then prune end
   snapshot(selid,keep,false)
+  if snapid.length >= MAXIMUM_SNAPSHOTS then prune end
+  if snapid.last > 900 then repack end
 end
 
 
