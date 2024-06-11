@@ -1,5 +1,4 @@
 #!/usr/bin/ruby
-#paru_cache_path = ENV['USER']+'.cache/paru/clone'
 pacman_log = (File.readlines '/var/log/pacman.log').reverse
 pacman_log.each.with_index do |line,index|
   if line.include? 'timepatrol-pre.hook' 
@@ -7,5 +6,4 @@ pacman_log.each.with_index do |line,index|
     break
   end
 end
-#PACMAN_TRANSACTION.sub!(paru_cache_path,'...')
 `/usr/local/bin/timepatrol snapshot "pre: #{PACMAN_TRANSACTION}"`
