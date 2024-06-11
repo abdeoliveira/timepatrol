@@ -73,9 +73,11 @@ def readinfo(id)
   return [date,time,comm,kernel,keep]
 end
 
-def colorline(string,id)
-  if id.odd? then string = string.white end
-  if id.even? then string = string.light_white end
+
+
+def colorline(string,index)
+  if index.odd? then string = string.white end
+  if index.even? then string = string.light_white end
   return string
 end
 
@@ -100,7 +102,7 @@ def list(opt)
     puts lineline
     puts legend.bold
     
-    snapid.each do |id|
+    snapid.each.with_index do |id,index|
     
       date   = readinfo(id)[0]
       time   = readinfo(id)[1]
@@ -114,11 +116,11 @@ def list(opt)
       kk = ''
       if keep == '1' then kk='*'.green.bold;space-=1 end
       
-      id_string = colorline("[#{id}]",id)
-      date = colorline(date,id)
-      time = colorline(time,id)
-      comm = colorline(comm,id)
-      kernel = colorline(kernel,id)
+      id_string = colorline("[#{id}]",index)
+      date = colorline(date,index)
+      time = colorline(time,index)
+      comm = colorline(comm,index)
+      kernel = colorline(kernel,index)
       
       puts ' '*space\
         +kk+\
@@ -142,7 +144,6 @@ end
 
 
 def rollback
-  
   if @array_selected.length != 1 then puts format_message("You\
  must choose a single ID. ABORTED.",1);abort end
 
@@ -256,7 +257,6 @@ end
 
 
 def delete
-  
   @array_selected.each do |id|
       puts showinfo(id).cyan
   end
