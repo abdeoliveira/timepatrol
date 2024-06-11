@@ -291,23 +291,22 @@ end
 
 def prune
   count = 0
-  maxdel = snapid.length + 1 - MAXIMUM_SNAPSHOTS
+  keep_count = 0
+  snapid.map{ |id| if readinfo(id)[4]=='1' then keep_count+=1 end }
+  maxdel = 1 + snapid.length - (MAXIMUM_SNAPSHOTS + keep_count)
+  
   snapid.each do |id|
     if count == maxdel then break end
-    
     unless readinfo(id)[4]=='1'
       code1 = `btrfs subvolume delete #{SNAPSHOTS_FOLDER}/#{id}/data; echo $?`.to_i
       code2 = `rm -r #{SNAPSHOTS_FOLDER}/#{id}; echo $?`.to_i 
-  
       if code1.abs + code2.abs > 0 
         puts format_message("FAILED pruning snapshot [#{id}]. ABORTED.",1)
       else
         puts format_message("pruning snapshot [#{id}].",0)
         count+=1
       end
-  
     end
-  
   end
 end
 
