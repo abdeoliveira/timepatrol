@@ -73,6 +73,13 @@ def readinfo(id)
   return [date,time,comm,kernel,keep]
 end
 
+def colorline(string,id)
+  if id.odd? then string = string.white end
+  if id.even? then string = string.light_white end
+  return string
+end
+
+
 
 def list(opt)
     title = ":: TIMEPATROL SNAPSHOTS ::"
@@ -107,15 +114,15 @@ def list(opt)
       kk = ''
       if keep == '1' then kk='*'.green.bold;space-=1 end
       
-      id = '['+id.to_s.light_white+']'
-      date = date.light_white
-      time = time.light_white
-      comm = comm.light_white
-      kernel = kernel.light_white
+      id_string = colorline("[#{id}]",id)
+      date = colorline(date,id)
+      time = colorline(time,id)
+      comm = colorline(comm,id)
+      kernel = colorline(kernel,id)
       
       puts ' '*space\
         +kk+\
-        +id+\
+        +id_string+\
         +' '*2+date\
         +' '*2+time\
         +' '*2+kernel\
