@@ -43,6 +43,7 @@ def splitstr(string,shift)
   max = 35
   line = ''
   total = 0
+  string.gsub!('/','/ ')
   string.split(' ').each do |s|
     scut = s[0..max]
     total = total + scut.size
@@ -53,6 +54,7 @@ def splitstr(string,shift)
       line = line + "\n" + ' '*shift + scut + ' ' 
     end
   end
+  line.gsub!('/ ','/')
   return line
 end
 
