@@ -9,7 +9,7 @@
 
 ### Arch and Arch-based
 
-First check the `install.sh` 
+First check the `arch-install.sh` 
 script. Then run `sudo ./arch-install.sh` if you are OK with it. Note it will install the `pacman` hook which is optional.
 
 ### Other distros
