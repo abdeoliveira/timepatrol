@@ -7,7 +7,7 @@
 
 ## Installation
 If you are on Arch or Arch-based distribution, first check the `install.sh` 
-script. Then run `sudo ./install.sh` if you are OK with it. Note it will install `pacman` hooks which are optional.
+script. Then run `sudo ./install.sh` if you are OK with it. Note it will install the `pacman` hook which is optional.
 
 If not, just `cp` the `timepatrol` script to a suitable path.
 
