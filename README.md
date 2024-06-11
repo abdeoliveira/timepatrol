@@ -6,10 +6,15 @@
 * gem 'colorize' (install with sudo, not --user-install) 
 
 ## Installation
-If you are on Arch or Arch-based distribution, first check the `install.sh` 
+
+### Arch and Arch-based
+
+First check the `install.sh` 
 script. Then run `sudo ./install.sh` if you are OK with it. Note it will install the `pacman` hook which is optional.
 
-If not, just `cp` the `timepatrol` script to a suitable path.
+### Other distros
+
+Make the `timepatrol` script executable and then copy it to a suitable path.
 
 ## Configuration 
 Copy the `config` example to `/etc/timepatrol/`.
