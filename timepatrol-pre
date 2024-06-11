@@ -2,7 +2,7 @@
 pacman_log = (File.readlines '/var/log/pacman.log').reverse
 pacman_log.each.with_index do |line,index|
   if line.include? 'timepatrol-pre.hook' 
-    PACMAN_TRANSACTION = pacman_log[index+1].split('[PACMAN]').last
+    PACMAN_TRANSACTION = pacman_log[index+1].split('[PACMAN]').last.strip
     break
   end
 end
