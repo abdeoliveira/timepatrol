@@ -166,7 +166,7 @@ def rollback
     id = snapid.last + 1
     date = readinfo(rollid)[0]
     time = readinfo(rollid)[1]
-    snapshot("pre rollback to [#{date} #{time}]",0,true)
+    snapshot("pre: rollback to [#{date} #{time}]",0,true)
     
     `mv #{MOUNT_POINT}/#{ROOT_VOLUME} #{MOUNT_POINT}/#{SNAPSHOTS_VOLUME}/#{id}/data`
     
