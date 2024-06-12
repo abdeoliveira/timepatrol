@@ -46,18 +46,19 @@ Type `sudo timepatrol help` for a basic list of commands. They are
 
 * `list`: lists your snapshots.
 
-* `snapshot 'OPTIONAL COMMENT'`: self-explanatory.
+* `snapshot 'OPTIONAL COMMENT'`: takes a snapshot of `/` with (optional) given comment.
 
-* `snapshot-keep 'OPTIONAL COMMENT'`: same as above plus it adds a protection against automatice deletion. Automatic deletion is set via the `MAXIMUM_SNAPSHOTS` 
+* `snapshot-keep 'OPTIONAL COMMENT'`: same as above plus it adds a protection against 
+automatice deletion. Automatic deletion is set via the `MAXIMUM_SNAPSHOTS` 
 variable in the `/etc/timepatrol/config` file. 
 Protected snapshots have a green mark close to their `ID` when `list`ed.
 Protected snapshots will not count against the `MAXIMUM_SNAPSHOTS` variable.
 
-* `delete`: self-explanatory. It accepts individual `ID` numbers and ranges. 
+* `delete`: deletes a snapshot. It accepts individual `ID` numbers and ranges. 
 For example: `sudo timepatrol delete 1,10,20-23` will delete snapshots whose 
 `ID`s are 1, 10, 20, 21, 22, and 23. The `delete` command also accepts 
 the following substring selectors: `date=`, `time=`, `kernel=`, and `comment=`.
-See the examples of usage below:
+See the example of usage below:
 
 First, `list`:
 ```
@@ -101,17 +102,27 @@ oliveira@arch:~$ sudo timepatrol delete time=10:
 :: Confirm deletion of the selected snapshot(s) above? [y/N]
 ```
 
-Note that all snapshot `time`s containing the user given substring `10:` were selected for deletion. I recommend you play with the other selectors. In any case, the user will always be prompted to confirm the deletion with the `No` answer being the defaut.
+Note that all snapshots containing the user-given substring `10:` in the `time` field 
+were selected for deletion. I recommend you play with the other selectors. I
+n any case, the user will always be prompted to confirm the deletion 
+with the `No` answer being the defaut.
 
-* `toggle-keep`: Toggles between protect and unprotect snapshots. It accepts individul `ID`, ranges and selectors as the `delete` command above.
+* `toggle-keep`: Toggles between protect and unprotect snapshots. 
+It accepts an individul `ID`, list of `ID`s, ranges and selectors similar to the 
+`delete` command above.
 
-* `rollback`: Rollsback the installation to a previous snapshot state. 
-Some notes: (i) rollback to a snapshot whose kernel is different from the 
+* `rollback`: rolls back the installation to a previous, selected snapshot state. 
+Some notes: 
+
+(i) rollback to a snapshot whose kernel is different from the 
 running kernel is not allowed (the script will ABORT). 
 You must adjust the current kernel (downgrade/upgrade), then 
-reboot (so it is loaded after upgrade/downgrade), then try to rollback. 
+reboot (so it is loaded), then try to rollback. 
+
 (ii) Plese read the recommendation regarding the `/etc/fstab` file before rollback. 
-(iii) If you are on Arch and uses the shipped pacman pre-hook, read the `Troubleshooting` section.
+
+(iii) If you are on Arch and uses the shipped pacman pre-hook, 
+read the `Troubleshooting` section.
 
 ## Bash completion
 
