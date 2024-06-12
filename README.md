@@ -23,7 +23,7 @@ For the subvolumes layout I recommend **against** using `@` for root and `@somet
 
 A note regarding `/etc/fstab`: The default installation in some distributions (Arch for instance) include the `subvolid` information in `fstab` for mounting points, including the `/` partition. Rollbacks change such a number so I recommend you omit the `subvolid` input from `fstab` at leats in the `/` line. Mine reads as follows:
 
-``
+```
 # Static information about the filesystems.
 # See fstab(5) for details.
 
@@ -38,7 +38,7 @@ UUID=054b4420-a2e0-41b1-8d66-8cc7198d8b55	/home     	btrfs     	rw,relatime,ssd,
 UUID=054b4420-a2e0-41b1-8d66-8cc7198d8b55	/var/log  	btrfs     	rw,relatime,ssd,space_cache=v2,subvolid=258,subvol=/@log	0 0
 
 ...
-``
+```
 
 
 ## Troubleshooting
