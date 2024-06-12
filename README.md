@@ -40,6 +40,76 @@ UUID=054b4420-a2e0-41b1-8d66-8cc7198d8b55	/var/log  	btrfs     	rw,relatime,ssd,
 ...
 ```
 
+## Usage
+
+Type `sudo timepatrol help` for a basic list of commands. They are
+
+* `list`: lists your snapshots.
+
+* `snapshot 'optional comment'`: self-explanatory.
+
+* `snapshot-keep`: same as above plus it adds a protection against automatice deletion. Automatic deletion is set via the `MAXIMUM_SNAPSHOTS` 
+variable in the `/etc/timepatrol/config` file. 
+Protected snapshots have a green mark close to their `ID` when `list`ed.
+
+* `delete`: self-explanatory. It accepts individual `ID` numbers and ranges. 
+For example: `sudo timepatrol delete 1,10,20-23` will delete snapshots whose 
+`ID`s are 1, 10, 20, 21, 22, and 23. The `delete` command also accepts 
+string the following string selectors: `date=`, `time=`, `kernel=`, and `comment=`.
+See the examples of usage below:
+
+First, `list`:
+```
+oliveira@arch:~$ sudo timepatrol list 
+====================================================================================
+                             :: TIMEPATROL SNAPSHOTS ::
+====================================================================================
+   ID   DATE        TIME      KERNEL         COMMENT
+   [1]  2024.06.11  09:57:31  6.9.3-arch1-1  System OK 
+   [4]  2024.06.11  10:01:05  6.9.3-arch1-1  pre: rollback to [2024.06.11 09:59:18] 
+   [5]  2024.06.11  10:07:15  6.9.3-arch1-1  pre: Running 'pacman --upgrade 
+                                             --noconfirm -- /home/oliveira/
+                                             .cache/paru/clone/qtgrace/
+                                             qtgrace-0.2.7-1-x86_64.pkg.tar.zst' 
+   [7]  2024.06.11  10:09:17  6.9.3-arch1-1  pre: rollback to [2024.06.11 10:08:19] 
+   [8]  2024.06.11  10:15:36  6.9.3-arch1-1  pre: Running 'pacman -Rs qtgrace' 
+   [9]  2024.06.11  13:20:00  6.9.3-arch1-1  automatic 
+ *[10]  2024.06.11  14:09:55  6.9.3-arch1-1  pre: starting full system upgrade. 
+                                             Upgraded Hyprland to 0.41.0 
+  [11]  2024.06.11  21:11:12  6.9.3-arch1-1  pre: Running 'pacman -S peek' 
+  [12]  2024.06.11  21:12:47  6.9.3-arch1-1  pre: Running 'pacman -S mplayer' 
+  [13]  2024.06.11  21:15:36  6.9.3-arch1-1  pre: Running 'pacman -Rs peek' 
+  [14]  2024.06.11  21:17:54  6.9.3-arch1-1  pre: Running 'pacman -S wf-recorder' 
+  [15]  2024.06.12  07:30:30  6.9.3-arch1-1  automatic 
+  [16]  2024.06.12  07:39:06  6.9.3-arch1-1  pre: starting full system upgrade 
+------------------------------------------------------------------------------------
+TOTAL: 13
+```
+
+Then, let's delete something:
+
+```
+oliveira@arch:~$ sudo timepatrol delete time=10:
+   [4] 2024.06.11 10:01:05 6.9.3-arch1-1 pre: rollback to [2024.06.11 09:59:18] 
+   [5] 2024.06.11 10:07:15 6.9.3-arch1-1 pre: Running 'pacman --upgrade 
+                                             --noconfirm -- /home/oliveira/
+                                             .cache/paru/clone/qtgrace/
+                                             qtgrace-0.2.7-1-x86_64.pkg.tar.zst' 
+   [7] 2024.06.11 10:09:17 6.9.3-arch1-1 pre: rollback to [2024.06.11 10:08:19] 
+   [8] 2024.06.11 10:15:36 6.9.3-arch1-1 pre: Running 'pacman -Rs qtgrace' 
+:: Confirm deletion of the selected snapshot(s) above? [y/N]
+```
+
+
+
+
+## Bash completion
+
+Copy and paste the following line to your `~/.bashrc`:
+
+```
+complete -W 'snapshot snapshot-keep toggle-keep delete rollback list help' timepatrol
+```
 
 ## Troubleshooting
 
