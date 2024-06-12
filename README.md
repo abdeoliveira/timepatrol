@@ -1,4 +1,5 @@
 # timepatrol
+
 ## BTRFS snapshot manager and rollback tool 
 
 ## Dependencies
@@ -7,7 +8,7 @@
 
 ## Installation
 
-### Arch and Arch-based
+### Arch
 
 First check the `arch-install.sh` 
 script. Then run `sudo ./arch-install.sh` if you are OK with it. Note it will install the `pacman` hook which is optional.
@@ -131,6 +132,42 @@ Copy and paste the following line to your `~/.bashrc`:
 ```
 complete -W 'snapshot snapshot-keep toggle-keep delete rollback list help' timepatrol
 ```
+
+## Changing a snapshot comment
+
+Snapshots are kept in the `SNAPSHOTS_FOLDER` provided by the user in 
+the `/etc/timepatrol/config` file. 
+
+Each snapshot is composed by a folder, having the general structure as
+
+```
+SNAPSHOT_FOLDER/ID/data
+```
+
+and an information file, which is
+
+```
+SNAPSHOT_FOLDER/ID/info
+```
+
+The information file is structured with positional strings separated by `;`, as 
+follows
+
+```
+date;time;comment;kernel;integer_variable
+```
+
+* `date` has format `yyyy.mm.dd`
+
+* `time` has format `hh:mm:ss`
+
+* `comment` is either empty or a string. It accepts spaces and most characters, but `;`.
+
+* `kernel` exaclty as given by `uname -r`
+
+* `integer_variable` is `0` or `1`. The former meaning the snapshot is unprotected 
+against automatic prunning, while the latter is the opposite. 
+
 
 ## Troubleshooting
 
