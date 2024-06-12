@@ -114,7 +114,7 @@ It accepts an individul `ID`, list of `ID`s, ranges and selectors similar to the
 * `rollback`: rolls back the installation to a previous, selected snapshot state. 
 Some notes: 
 
-(i) rollback to a snapshot whose kernel is different from the 
+(i) rolling back to a snapshot whose kernel is different from the 
 running kernel is not allowed (the script will ABORT). 
 You must adjust the current kernel (downgrade/upgrade), then 
 reboot (so it is loaded), then try to rollback. 
