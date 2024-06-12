@@ -150,7 +150,8 @@ and an information file, which is
 SNAPSHOT_FOLDER/ID/info
 ```
 
-The information file is structured with positional strings separated by `;`, as 
+The information file is a text file, 
+structured with positional strings separated by `;`, as 
 follows
 
 ```
@@ -163,10 +164,14 @@ date;time;comment;kernel;integer_variable
 
 * `comment` is either empty or a string. It accepts spaces and most characters, but `;`.
 
-* `kernel` exaclty as given by `uname -r`
+* `kernel` is exaclty as given by `uname -r`
 
 * `integer_variable` is `0` or `1`. The former meaning the snapshot is unprotected 
 against automatic prunning, while the latter is the opposite. 
+
+
+Now if you want to edit any information regarding any snapshot (most probably the
+comment), it is just a matter of `vim` or `nano` its correspondent `info` file.
 
 
 ## Troubleshooting
