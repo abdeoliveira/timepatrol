@@ -10,5 +10,5 @@ cp timepatrol-pre $PATH_LIBALPM/scripts/
 cp timepatrol /usr/local/bin/
 
 mkdir -p $CONFIG_DIR
-cp config /etc/timepatrol/
+cp config $CONFIG_DIR
 
