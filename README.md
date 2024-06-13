@@ -197,9 +197,10 @@ comment), it is just a matter of `vim` or `nano` its correspondent `info` file.
 
 ## Troubleshooting
 
-### You updated the kernel, didn't reboot and rollback
+### Unbootable system after: kernel upgrade --> system NOT rebooted --> rollback
 
-If you did this you probably ended with an unbootable system. I have no sufficient
+If you performed  this specific sequency 
+you probably ended with an unbootable system. I have no sufficient
 knowledge to cover all system-rescue situations, but I would say that
 the following steps would fit in most cases:
 
