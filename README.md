@@ -104,8 +104,8 @@ oliveira@arch:~$ sudo timepatrol delete time=10:
 ```
 
 Note that all snapshots containing the user-given substring `10:` in the `time` field 
-were selected for deletion. I recommend you play with the other selectors. I
-n any case, the user will always be prompted to confirm the deletion 
+were selected for deletion. I recommend you play with the other selectors. In 
+any case, the user will always be prompted to confirm the deletion 
 with the `No` answer being the defaut.
 
 * `toggle-keep`: Toggles between protect and unprotect snapshots. 
@@ -126,7 +126,7 @@ reboot (so it is loaded), then try to rollback.
 read the `Troubleshooting` section.
 
 (iv) Reboot immediately after kernel upgrade. To be on the safe side, 
-**always** reboot immediately after **any** system upgrade. See the `Troubleshooting`
+reboot immediately after **any** system upgrade. See the `Troubleshooting`
 section also.
 
 ## Bash completion
