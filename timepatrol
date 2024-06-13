@@ -409,9 +409,10 @@ end
 
 
 if opt == 'help' 
-  puts 'USAGE:    timepatrol [COMMAND]'
-  puts '------------------------------'
-  puts 'COMMANDS:'
+  puts '------------------------------'.bold
+  puts 'USAGE:    timepatrol [COMMAND]'.bold
+  puts '------------------------------'.bold
+  puts 'COMMANDS:'.yellow.bold
   puts "          snapshot 'COMMENT'"
   puts "          snapshot-keep 'COMMENT'"
   puts "          toggle-keep"
