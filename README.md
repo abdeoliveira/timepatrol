@@ -2,12 +2,26 @@
 
 ## BTRFS snapshot manager and rollback tool 
 
+![Alt text](/screenshots/1.png?raw=true "Timepatrol in action!")
 
+Timepatrol is a BTRFS snapshot manager and a rollback tool in a single script.
+There are great tools out there which do the same, like Timeshift and Snapper,
+for example, but I still prefer Timepatrol because:
 
-![Alt text](/screenshots/1.png?raw=true "Optional Title")
+* I like to code even I'm not a professional programmer. 
+* Easy to rollback to any snapshot.
+* Minimal dependencies (ruby).
+* Outputs fit in half screen. Perfect for window manager users. 
+* It has colors. ;-)
 
+In fact, it was written based on my personal needs but it may 
+be of interest of a few people also. 
 
+In principle it can be used in any Linux distribution. Arch users
+will benefit from the `pacman` pre hook which I found to be
+very handy in the day-to-day use.
 
+####Finally, this is an early project, thus use it with caution!####
 
 ## Dependencies
 * `ruby`
