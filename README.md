@@ -21,7 +21,16 @@ In principle it can be used in any Linux distribution. Arch users
 will benefit from the `pacman` pre hook which I found to be
 very handy in the day-to-day use.
 
-#### Finally, this is an early project, thus use it with caution!
+## Disclaimer
+
+This is an early, experimental project. DO NOT use in a
+production environment!
+
+## Limitations
+
+* This script was NOT tested in systems with encrypted `/boot` partitions.
+Rollbacks will likely fail in such environments. 
+ 
 
 ## Dependencies
 * `ruby`
