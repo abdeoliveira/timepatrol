@@ -147,7 +147,7 @@ with `sudo crontab -e`. If you for example want a hourly system snapshot,
 use something like 
 
 ```
-0 * * * * /usr/local/bin/timepatrol snapshot 'hourly snapshots' >> /tmp/timepatrol.log 2>&1
+0 * * * * /usr/local/bin/timepatrol snapshot 'hourly snapshot' >> /tmp/timepatrol.log 2>&1
 ```
 
 
