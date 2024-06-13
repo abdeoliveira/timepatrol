@@ -125,6 +125,10 @@ reboot (so it is loaded), then try to rollback.
 (iii) If you are on Arch and uses the shipped pacman pre-hook, 
 read the `Troubleshooting` section.
 
+(iv) Reboot immediately after kernel upgrade. To be on the safe side, 
+**always** reboot immediately after **any** system upgrade. See the `Troubleshooting`
+section also.
+
 ## Bash completion
 
 Copy and paste the following line to your `~/.bashrc`:
@@ -132,6 +136,23 @@ Copy and paste the following line to your `~/.bashrc`:
 ```
 complete -W 'snapshot snapshot-keep toggle-keep delete rollback list help' timepatrol
 ```
+
+## Periodic, automatic snapshots
+
+The simplest way is probably setting a cronjob as root. 
+
+First, install `cronie`, then enable its service (something like 
+`systemctl enable --now cronie.service`). Finnaly edit the crontab
+with `sudo crontab -e`. If you for example want a hourly system snapshot, 
+use something like 
+
+```
+0 * * * * /usr/local/bin/timepatrol snapshot 'hourly snapthos' >> /tmp/timepatrol.log 2>&1
+```
+
+
+and keep an eye on the file `/tmp/timepatrol.log` for eventual errors (hope not!).
+
 
 ## Changing a snapshot comment
 
@@ -175,6 +196,19 @@ comment), it is just a matter of `vim` or `nano` its correspondent `info` file.
 
 
 ## Troubleshooting
+
+### You updated the kernel, didn't reboot and rollback
+
+If you did this you probably ended with an unbootable system. I have no sufficient
+knowledge to cover all system-rescue situations, but I would say that
+the following steps would fit in most cases:
+
+1. Boot using a live media
+2. Chroot into your (broken) system
+3. Mount all partitions (eg. `mount -a`)
+4. Reinstall your boot loader. Alterativelly, you can try to downgrade the kernel.
+5. Exit chroot. Reboot.
+
 
 ### Locked pacman database after rollback
 If you are on an Arch-based distro and you are using the pre-hook and have performed 
