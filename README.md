@@ -207,7 +207,9 @@ the following steps would fit in most cases:
 1. Boot using a live media
 2. Chroot into your (broken) system
 3. Mount all partitions (eg. `mount -a`)
-4. Reinstall your boot loader. Alterativelly, you can try to downgrade the kernel. If you are on Arch, try this second rout since `pacman` is very good on setting things up. 
+4. Reinstall your boot loader. Alterativelly, 
+you can try to downgrade the kernel. If you are on Arch, try this second route 
+since `pacman` is very good on setting things up. 
 5. Exit chroot. Reboot.
 
 
