@@ -242,3 +242,10 @@ check if there is any process using it: `fuser /var/lib/pacman/db.lck`.
 If not, you can safely remove the lock: `rm /var/lib/pacman/db.lck`.
 
 
+## Bugs
+
+* Pacman pre hook: the `timepatrol-pre` script relies on the fact it 
+is the first pre hook script called by `pacman`
+in order to retrieve what `pacman` is doing and pass it to
+`timepatrol` to use as comment for pre snapshot. This is not optimal
+and I have to look into it in the future.
