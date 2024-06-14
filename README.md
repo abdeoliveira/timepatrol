@@ -26,12 +26,15 @@ very handy in the day-to-day use.
 This is an early, experimental project. DO NOT use in a
 production environment!
 
+<<<<<<< HEAD
 <!--## Limitations
 
 * This script was NOT tested in systems with encrypted `/boot` partitions.
 Rollbacks will likely fail in such environments. -->
  
 
+=======
+>>>>>>> 3d70c1f26ed3d5c480d8e0cfe3e574a1c6008639
 ## Dependencies
 * `ruby`
 * `gem colorize` (installed as root, **not** `--user-install`) 
