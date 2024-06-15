@@ -25,6 +25,13 @@ def snapid
   return id_list.sort
 end
 
+def clean_pre_hook(path)
+  pacman_lock_file = "#{path}/data/var/lib/pacman/db.lck"
+  puts pacman_lock_file
+  if File.exists? pacman_lock_file 
+    puts `rm #{pacman_lock_file}` 
+  end
+end
 
 def snapshot(comm,keep,fake)
   id = snapid.last.to_i + 1
@@ -32,7 +39,10 @@ def snapshot(comm,keep,fake)
   kernel = `uname -r`.chomp
   `mkdir #{path}`
   if comm.nil? then comm = '' end
-  unless fake then puts `btrfs subvolume snapshot / #{path}/data` end
+  unless fake 
+    puts `btrfs subvolume snapshot / #{path}/data` 
+    if @pacman_pre_hook then clean_pre_hook(path) end
+  end
   comm = comm.gsub(';','')
   info = "#{now};#{comm};#{kernel};#{keep}"
   File.write("#{path}/info",info,mode:'w')
@@ -193,7 +203,8 @@ def rollback
     date = readinfo(rollid)[0]
     time = readinfo(rollid)[1]
 
-    snapshot("pre: rollback to [#{date} #{time}]",0,true)
+    snapshot("pre: rollback to [#{date} #{time}]",0,true) 
+    
     `mv #{MOUNT_POINT}/#{ROOT_VOLUME} #{MOUNT_POINT}/#{SNAPSHOTS_VOLUME}/#{id}/data`
     `btrfs subvolume snapshot #{MOUNT_POINT}/#{SNAPSHOTS_VOLUME}/#{rollid}/data #{MOUNT_POINT}/#{ROOT_VOLUME}`
     list_subvol = `btrfs subvolume list /`.split("\n")
@@ -205,6 +216,7 @@ def rollback
       end
     end
 
+   
     `umount #{MOUNT_POINT} && rm -r #{MOUNT_POINT}`
 
     puts format_message("Confirmed. Rebooting in...",0)
@@ -362,30 +374,20 @@ def format_message(message,mode)
 end
 
 
-def basic_check_root_subvol 
-  list = `btrfs subvolume list / | grep #{ROOT_VOLUME}`
-  if list.split("\n").length != 1 
-    puts format_message("Grep root subvolume\
- '#{ROOT_VOLUME}' returns many entries while it is expected one. ABORTED.",1)
-    abort
-  end
-end
-
-
 unless ENV['USER'] == 'root'
   puts format_message("You should run as root. ABORTED.",1)
   abort
 end
 
-#basic_check_root_subvol
 
 opt = ARGV[0]
 selid = ARGV[1]
+@pacman_pre_hook = false
 if opt.nil? then opt = 'help' end
-
 
 if opt.include? 'snapshot'
   keep = 0
+  if ARGV[2] == 'pacman-pre-hook' then @pacman_pre_hook = true end
   if opt == 'snapshot-keep' then keep = 1 end 
   snapshot(selid,keep,false)
   if snapid.length >= MAXIMUM_SNAPSHOTS then prune end

@@ -6,4 +6,4 @@ pacman_log.each.with_index do |line,index|
     break
   end
 end
-`/usr/local/bin/timepatrol snapshot "pre: #{PACMAN_TRANSACTION}"`
+`/usr/local/bin/timepatrol snapshot "pre: #{PACMAN_TRANSACTION}" pacman-pre-hook`
