@@ -27,7 +27,6 @@ end
 
 def clean_pre_hook(path)
   pacman_lock_file = "#{path}/data/var/lib/pacman/db.lck"
-  puts pacman_lock_file
   if File.exists? pacman_lock_file 
     puts `rm #{pacman_lock_file}` 
   end
@@ -151,22 +150,6 @@ def list(opt)
     end
 
 end
-
-=begin
-def rollback_magick(id)
-  `mv #{MOUNT_POINT}/#{ROOT_VOLUME} #{MOUNT_POINT}/#{SNAPSHOTS_VOLUME}/#{id}/data`
-  `btrfs subvolume snapshot #{MOUNT_POINT}/#{SNAPSHOTS_VOLUME}/#{rollid}/data #{MOUNT_POINT}/#{ROOT_VOLUME}`
-
- list_subvol = `btrfs subvolume list /`.split("\n")
- list_subvol.each do |subvol|
-   data = subvol.split(' ')
-   if data[8] == ROOT_VOLUME 
-     `btrfs subvolume set-default #{data[1]} /`
-     break
-   end
- end
-end
-=end
 
 
 def rollback
