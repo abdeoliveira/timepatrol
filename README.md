@@ -50,8 +50,6 @@ Make the `timepatrol` script executable and then copy it to a suitable path.
 ## Configuration 
 Copy the `config` example to `/etc/timepatrol/` and adjust it as per your system.
 
-For the subvolumes layout I recommend **against** using `@` for root and `@something` for the rest since the script needs to grep the root subvolume for rollbacks. Apart from that you can use virtually anything for naming and layout.
-
 A note regarding `/etc/fstab`: The default installation in some distributions (Arch for instance) include the `subvolid` information in `fstab` for mounting points, including the `/` partition. Rollbacks change such a number so I recommend you omit the `subvolid` input from `fstab` at leats in the `/` line. Mine reads as follows:
 
 ```
@@ -60,7 +58,7 @@ A note regarding `/etc/fstab`: The default installation in some distributions (A
 
 # <file system> <dir> <type> <options> <dump> <pass>
 # /dev/mapper/ainstnvme0n1p2
-UUID=054b4420-a2e0-41b1-8d66-8cc7198d8b55	/         	btrfs     	rw,relatime,ssd,space_cache=v2,subvol=/@root	0 0
+UUID=054b4420-a2e0-41b1-8d66-8cc7198d8b55	/         	btrfs     	rw,relatime,ssd,space_cache=v2,subvol=/@	0 0
 
 # /dev/mapper/ainstnvme0n1p2
 UUID=054b4420-a2e0-41b1-8d66-8cc7198d8b55	/home     	btrfs     	rw,relatime,ssd,space_cache=v2,subvolid=257,subvol=/@home	0 0

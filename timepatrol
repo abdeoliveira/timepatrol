@@ -142,6 +142,22 @@ def list(opt)
 
 end
 
+=begin
+def rollback_magick(id)
+  `mv #{MOUNT_POINT}/#{ROOT_VOLUME} #{MOUNT_POINT}/#{SNAPSHOTS_VOLUME}/#{id}/data`
+  `btrfs subvolume snapshot #{MOUNT_POINT}/#{SNAPSHOTS_VOLUME}/#{rollid}/data #{MOUNT_POINT}/#{ROOT_VOLUME}`
+
+ list_subvol = `btrfs subvolume list /`.split("\n")
+ list_subvol.each do |subvol|
+   data = subvol.split(' ')
+   if data[8] == ROOT_VOLUME 
+     `btrfs subvolume set-default #{data[1]} /`
+     break
+   end
+ end
+end
+=end
+
 
 def rollback
   countdown = 10 # seconds before rebooting
@@ -164,28 +180,33 @@ def rollback
   
   if STDIN.gets.chomp == 'y' 
     `mkdir #{MOUNT_POINT} && mount -o subvolid=5 #{DEVICE} #{MOUNT_POINT}`
+    
     check_root = Dir.exists? MOUNT_POINT+'/'+ROOT_VOLUME
     check_snap = Dir.exists? MOUNT_POINT+'/'+SNAPSHOTS_VOLUME
     unless check_root and check_snap
       puts format_message("Mounting stage went wrong. ABORTED.",1)
       abort
     end
-    
+   
+
     id = snapid.last + 1
     date = readinfo(rollid)[0]
     time = readinfo(rollid)[1]
+
     snapshot("pre: rollback to [#{date} #{time}]",0,true)
-    
     `mv #{MOUNT_POINT}/#{ROOT_VOLUME} #{MOUNT_POINT}/#{SNAPSHOTS_VOLUME}/#{id}/data`
-    
     `btrfs subvolume snapshot #{MOUNT_POINT}/#{SNAPSHOTS_VOLUME}/#{rollid}/data #{MOUNT_POINT}/#{ROOT_VOLUME}`
-    
+    list_subvol = `btrfs subvolume list /`.split("\n")
+    list_subvol.each do |subvol|
+      data = subvol.split(' ')
+      if data[8] == ROOT_VOLUME 
+        `btrfs subvolume set-default #{data[1]} /`
+        break
+      end
+    end
+
     `umount #{MOUNT_POINT} && rm -r #{MOUNT_POINT}`
-    
-    root_id = `btrfs subvolume list / | grep #{ROOT_VOLUME}`.split(' ')[1].to_i
-    
-    `btrfs subvolume set-default #{root_id} /`
-    
+
     puts format_message("Confirmed. Rebooting in...",0)
       (countdown-1).times do |i| 
         puts countdown-=1
@@ -199,6 +220,7 @@ def rollback
     puts format_message('ABORTED.',1)
   end
 end
+
 
 
 def showinfo(id)
@@ -308,9 +330,9 @@ def prune
       code1 = `btrfs subvolume delete #{SNAPSHOTS_FOLDER}/#{id}/data; echo $?`.to_i
       code2 = `rm -r #{SNAPSHOTS_FOLDER}/#{id}; echo $?`.to_i 
       if code1.abs + code2.abs > 0 
-        puts format_message("FAILED pruning snapshot [#{id}]. ABORTED.",1)
+        puts "FAILED pruning snapshot [#{id}]. ABORTED.")
       else
-        puts format_message("pruning snapshot [#{id}].",0)
+        puts "pruning snapshot [#{id}]."
         count+=1
       end
     end
@@ -344,7 +366,7 @@ def basic_check_root_subvol
   list = `btrfs subvolume list / | grep #{ROOT_VOLUME}`
   if list.split("\n").length != 1 
     puts format_message("Grep root subvolume\
- (#{ROOT_VOLUME}) returns many entries while it is expected one. ABORTED.",1)
+ '#{ROOT_VOLUME}' returns many entries while it is expected one. ABORTED.",1)
     abort
   end
 end
@@ -355,7 +377,7 @@ unless ENV['USER'] == 'root'
   abort
 end
 
-basic_check_root_subvol
+#basic_check_root_subvol
 
 opt = ARGV[0]
 selid = ARGV[1]

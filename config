@@ -11,7 +11,7 @@ SNAPSHOTS_VOLUME = '@snapshots'
 
 # The root subvolume. For now, I recommend against using the 
 # default of most systems, which is '@'. Pick '@root', for example.
-ROOT_VOLUME = '@root'
+ROOT_VOLUME = '@'
 
 # The mamixum number of snapshots you want to keep.
 MAXIMUM_SNAPSHOTS = 20
