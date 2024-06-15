@@ -240,15 +240,10 @@ you can try to downgrade the kernel. If you are on Arch, try this second route
 since `pacman` is very good on setting things up. 
 5. Exit chroot. Reboot.
 
-
-### Locked pacman database after rollback
-If you are on an Arch-based distro and you are using the pre-hook and have performed 
-a rollback, you may endup with a locked pacman data base. Pacman will complain 
-it can not lock data base before any transaction. To resolve this first
-check if there is any process using it: `fuser /var/lib/pacman/db.lck`. 
-If not, you can safely remove the lock: `rm /var/lib/pacman/db.lck`.
-
-
 ## Bugs
 
-* It certainly have some...
+* Pacman pre hook: the `timepatrol-pre` script relies on the fact it 
+is the first pre hook script called by `pacman`
+in order to retrieve what `pacman` is doing and pass it to
+`timepatrol` to use as comment for pre snapshot. This is not optimal
+and I have to look into it in the future.
