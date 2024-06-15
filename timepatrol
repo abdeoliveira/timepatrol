@@ -330,7 +330,7 @@ def prune
       code1 = `btrfs subvolume delete #{SNAPSHOTS_FOLDER}/#{id}/data; echo $?`.to_i
       code2 = `rm -r #{SNAPSHOTS_FOLDER}/#{id}; echo $?`.to_i 
       if code1.abs + code2.abs > 0 
-        puts "FAILED pruning snapshot [#{id}]. ABORTED.")
+        puts "FAILED pruning snapshot [#{id}]. ABORTED."
       else
         puts "pruning snapshot [#{id}]."
         count+=1
