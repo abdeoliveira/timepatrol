@@ -18,19 +18,13 @@ In fact, it was written based on my personal needs but it may
 be of interest of a few people also. 
 
 In principle it can be used in any Linux distribution. Arch users
-will benefit from the `pacman` pre hook which I found to be
+will benefit from the `pacman` pre and post hooks which I found to be
 very handy in the day-to-day use.
 
 ## Disclaimer
 
 This is an early, experimental project. DO NOT use in a
 production environment!
-
-<!--## Limitations
-
-* This script was NOT tested in systems with encrypted `/boot` partitions.
-Rollbacks will likely fail in such environments. -->
- 
 
 ## Dependencies
 * `ruby`
@@ -41,7 +35,8 @@ Rollbacks will likely fail in such environments. -->
 ### Arch
 
 First check the `arch-install.sh` 
-script. Then run `sudo ./arch-install.sh` if you are OK with it. Note it will install the `pacman` hook which is optional.
+script. Then run `sudo ./arch-install.sh` if you are OK with it. 
+Note it will install the `pacman` hooks which is optional.
 
 ### Other distros
 
@@ -150,10 +145,7 @@ reboot (so it is loaded), then try to rollback.
 
 (ii) Plese read the recommendation regarding the `/etc/fstab` file before rollback. 
 
-(iii) If you are on Arch and uses the shipped pacman pre-hook, 
-read the `Troubleshooting` section.
-
-(iv) Reboot immediately after kernel upgrade. To be on the safe side, 
+(iii) Reboot immediately after kernel upgrade. To be on the safe side, 
 reboot immediately after **any** system upgrade. See the `Troubleshooting`
 section also.
 
@@ -225,10 +217,13 @@ comment), it is just a matter of `vim` or `nano` its correspondent `info` file.
 
 ## Troubleshooting
 
-### Unbootable system after: kernel upgrade --> system NOT rebooted --> rollback
+### Unbootable system after rollback
 
-If you performed  this specific sequency 
-you probably ended with an unbootable system. I have no sufficient
+Many factors can lead to an unbootable system after rollback.
+For example, you may have upgraded the kernel, didn't reboot
+and rollback. 
+
+I have no sufficient
 knowledge to cover all system-rescue situations, but I would say that
 the following steps would fit in most cases:
 
@@ -239,11 +234,3 @@ the following steps would fit in most cases:
 you can try to downgrade the kernel. If you are on Arch, try this second route 
 since `pacman` is very good on setting things up. 
 5. Exit chroot. Reboot.
-
-## Bugs
-
-* Pacman pre hook: the `timepatrol-pre` script relies on the fact it 
-is the first pre hook script called by `pacman`
-in order to retrieve what `pacman` is doing and pass it to
-`timepatrol` to use as comment for pre snapshot. This is not optimal
-and I have to look into it in the future.

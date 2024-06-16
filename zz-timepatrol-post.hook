@@ -1,0 +1,12 @@
+[Trigger]
+Operation = Upgrade
+Operation = Install
+Operation = Remove
+Type = Package
+Target = *
+
+[Action]
+Description = Performing timepatrol post snapshot...
+When = PostTransaction
+Exec = /usr/share/libalpm/scripts/timepatrol-post
+NeedsTargets

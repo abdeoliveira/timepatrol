@@ -6,7 +6,7 @@ Type = Package
 Target = *
 
 [Action]
-Description = Performing timepatrol pre snapshots...
+Description = Performing timepatrol pre snapshot...
 When = PreTransaction
 Exec = /usr/share/libalpm/scripts/timepatrol-pre
 NeedsTargets
