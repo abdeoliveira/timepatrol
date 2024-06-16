@@ -8,11 +8,11 @@ Timepatrol is a BTRFS snapshot manager and a rollback tool in a single script.
 There are great tools out there which do the same, like Timeshift and Snapper,
 for example, but I still prefer Timepatrol because:
 
-* I like to code even I'm not a professional programmer. 
 * Easy to rollback to any snapshot.
 * Minimal dependencies (ruby).
 * Outputs fit in half screen. Perfect for window manager users. 
 * It has colors. ;-)
+* I like to code even I'm not a professional programmer. 
 
 In fact, it was written based on my personal needs but it may 
 be of interest of a few people also. 
@@ -28,7 +28,7 @@ production environment!
 
 ## Dependencies
 * `ruby`
-* `gem colorize` (installed as root, **not** `--user-install`) 
+* `sudo gem colorize` (yes, installed as root) 
 
 ## Installation
 
