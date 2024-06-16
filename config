@@ -12,8 +12,8 @@ SNAPSHOTS_VOLUME = '@snapshots'
 # The root subvolume.
 ROOT_VOLUME = '@'
 
-# The mamixum number of snapshots is kept. Protected snapshots
-# will not count against the number below.
+# The mamixum number of snapshots to be kept. Protected snapshots
+# will not count against the MAXIMUM_SNAPSHOTS number.
 MAXIMUM_SNAPSHOTS = 50
 
 # A temporary location to be used by Timepatrol when performing rollbacks.
