@@ -6,7 +6,7 @@ actions = ''
 pacman_log = (File.readlines '/var/log/pacman.log').reverse
 
 pacman_log.each do |line|
-  if line.include? '05-timepatrol-pre.hook' then break end
+  if line.include? 'timepatrol-pre.hook' then break end
   first_stage<<line
 end
 

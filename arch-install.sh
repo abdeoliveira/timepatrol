@@ -5,7 +5,7 @@ CONFIG_DIR=/etc/timepatrol
 chmod +x timepatrol-pre
 chmod +x timepatrol
 
-cp 05-timepatrol-pre.hook $PATH_LIBALPM/hooks/
+cp 00-timepatrol-pre.hook $PATH_LIBALPM/hooks/
 cp zz-timepatrol-post.hook $PATH_LIBALPM/hooks/
 cp timepatrol-pre $PATH_LIBALPM/scripts/
 cp timepatrol-post $PATH_LIBALPM/scripts/
