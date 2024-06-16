@@ -36,7 +36,7 @@ production environment!
 
 First check the `arch-install.sh` 
 script. Then run `sudo ./arch-install.sh` if you are OK with it. 
-Note it will install the `pacman` hooks which is optional.
+Note it will install `pacman` hooks which are optional.
 
 ### Other distros
 
