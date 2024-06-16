@@ -17,6 +17,7 @@ end
 
 second_stage.each.with_index do |line,index|
   actions += line.split('[ALPM]').last.strip
+  if index + 1 < second_stage.length then actions += ', ' end
 end
 
 `/usr/local/bin/timepatrol snapshot "POST: #{actions}"`
