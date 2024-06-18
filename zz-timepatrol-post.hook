@@ -8,5 +8,5 @@ Target = *
 [Action]
 Description = Performing timepatrol post snapshot...
 When = PostTransaction
-Exec = /usr/share/libalpm/scripts/timepatrol-post
+Exec = /usr/share/libalpm/scripts/timepatrol-pacman post
 NeedsTargets

@@ -8,6 +8,6 @@ Target = *
 [Action]
 Description = Performing timepatrol pre snapshot...
 When = PreTransaction
-Exec = /usr/share/libalpm/scripts/timepatrol-pre
+Exec = /usr/share/libalpm/scripts/timepatrol-pacman pre
 NeedsTargets
 AbortOnFail

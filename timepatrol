@@ -25,13 +25,6 @@ def snapid
   return id_list.sort
 end
 
-def clean_pre_hook(path)
-  pacman_lock_file = "#{path}/data/var/lib/pacman/db.lck"
-  if File.exists? pacman_lock_file 
-    puts `rm #{pacman_lock_file}` 
-  end
-end
-
 def snapshot(comm,keep,fake)
   id = snapid.last.to_i + 1
   path = SNAPSHOTS_FOLDER + '/' + id.to_s
@@ -40,7 +33,7 @@ def snapshot(comm,keep,fake)
   if comm.nil? then comm = '' end
   unless fake 
     puts `btrfs subvolume snapshot / #{path}/data` 
-    if @pacman_pre_hook then clean_pre_hook(path) end
+    File.write('/tmp/timepatrol_last_snapshot',path,mode:'w')
   end
   comm = comm.gsub(';','')
   info = "#{now};#{comm};#{kernel};#{keep}"
@@ -370,7 +363,6 @@ if opt.nil? then opt = 'help' end
 
 if opt.include? 'snapshot'
   keep = 0
-  if ARGV[2] == 'pacman-pre-hook' then @pacman_pre_hook = true end
   if opt == 'snapshot-keep' then keep = 1 end 
   snapshot(selid,keep,false)
   if snapid.length >= MAXIMUM_SNAPSHOTS then prune end
