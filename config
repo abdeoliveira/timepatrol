@@ -14,6 +14,7 @@ ROOT_VOLUME = '@'
 
 # The mamixum number of snapshots to be kept. Protected snapshots
 # will not count against the MAXIMUM_SNAPSHOTS number.
+# Do NOT use ''.
 MAXIMUM_SNAPSHOTS = 50
 
 # A temporary location to be used by Timepatrol when performing rollbacks.

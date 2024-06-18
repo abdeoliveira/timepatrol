@@ -2,7 +2,6 @@
 require 'colorize'
 load '/etc/timepatrol/config'
 
-
 def now
  Time.new.strftime "%Y.%m.%d;%H:%M:%S"
 end
