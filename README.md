@@ -45,7 +45,10 @@ Make the `timepatrol` script executable and then copy it to a suitable path.
 ## Configuration 
 Copy the `config` example to `/etc/timepatrol/` and adjust it as per your system.
 
-A note regarding `/etc/fstab`: The default installation in some distributions (Arch for instance) include the `subvolid` information in `fstab` for mounting points, including the `/` partition. Rollbacks change such a number so I recommend you omit the `subvolid` input from `fstab` at leats in the `/` line. Mine reads as follows:
+A note regarding `/etc/fstab`: The default installation in some distributions 
+(Arch for instance) include the `subvolid` information in `fstab` for mounting 
+points. Since rollbacks change such a number I recommend you omit the `subvolid` 
+in the `/` entry. Mine reads as follows:
 
 ```
 # Static information about the filesystems.
