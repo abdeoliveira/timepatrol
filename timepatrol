@@ -289,7 +289,7 @@ end
 
 
 def repack
-  puts format_message("Repacking snapshots...",0)
+  puts "Repacking snapshots..."
   path = SNAPSHOTS_FOLDER+'/'
   
   snapid.each.with_index do |v,j|
@@ -358,7 +358,6 @@ end
 
 opt = ARGV[0]
 selid = ARGV[1]
-@pacman_pre_hook = false
 if opt.nil? then opt = 'help' end
 
 if opt.include? 'snapshot'
