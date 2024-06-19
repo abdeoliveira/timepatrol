@@ -28,7 +28,7 @@ production environment!
 
 ## Dependencies
 * `ruby`
-* `sudo gem colorize` (yes, installed as root) 
+* `gem colorize` (as ROOT) 
 
 ## Installation
 
