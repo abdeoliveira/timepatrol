@@ -43,7 +43,7 @@ Run the `uninstall.sh` script.
 
 
 ## Configuration 
-Copy the `config` example to `/etc/timepatrol/` and adjust it as per your system.
+Adjust the `/etc/timepatrol/config` file as per your system.
 
 A note regarding `/etc/fstab`: The default installation in some distributions 
 (Arch for instance) include the `subvolid` information in `fstab` for mounting 
