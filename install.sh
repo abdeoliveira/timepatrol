@@ -37,6 +37,7 @@ cp timepatrol /usr/local/bin/
 mkdir -p $CONFIG_DIR
 cp config $CONFIG_DIR
 echo "* Installed 'timepatrol' at '/usr/local/bin'."
+echo "* Installed the 'config' file at '/etc/timepatrol'."
 
 ## INSTALLS HOOKS IF PACMAN IS FOUND.
 if command -v pacman &> /dev/null; then
@@ -45,8 +46,9 @@ if command -v pacman &> /dev/null; then
 	cp 05-timepatrol-pre.hook $PATH_LIBALPM/hooks/
 	cp zz-timepatrol-post.hook $PATH_LIBALPM/hooks/
 	echo "* Found 'pacman':"
-	echo "                  --> installed hooks at '$PATH_LIBALPM/hooks'"
+	echo "                  --> installed hooks at '$PATH_LIBALPM/hooks'."
 	echo "                  --> installed auxiliary script 'timepatrol-pacman' at"
 	echo "                      '$PATH_LIBALPM/scripts'."
 fi
+
 echo "SUCCESS!"
