@@ -41,9 +41,6 @@ the auxiliary script `timepatrol-pacman`.
 
 Run the `uninstall.sh` script.
 
-### Other distros
-
-Make the `timepatrol` script executable and then copy it to a suitable path.
 
 ## Configuration 
 Copy the `config` example to `/etc/timepatrol/` and adjust it as per your system.
