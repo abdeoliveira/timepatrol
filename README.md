@@ -32,11 +32,13 @@ production environment!
 
 ## Installation
 
-### Arch
+Run the `install.sh` script. 
+*Note:* If `pacman` is found, it will also installs pacman hooks and 
+the auxiliary script `timepatrol-pacman`.
 
-First check the `arch-install.sh` 
-script. Then run `sudo ./arch-install.sh` if you are OK with it. 
-Note it will install `pacman` hooks which are optional.
+## Uninstall
+
+Run the `uninstall.sh` script.
 
 ### Other distros
 

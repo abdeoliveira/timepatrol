@@ -350,7 +350,7 @@ end
 
 
 unless ENV['USER'] == 'root'
-  puts format_message("You should run as root. ABORTED.",1)
+  puts format_message("You must run as root. ABORTED.",1)
   abort
 end
 
