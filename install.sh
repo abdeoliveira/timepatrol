@@ -3,6 +3,7 @@ set -e
 
 PATH_LIBALPM=/usr/share/libalpm
 CONFIG_DIR=/etc/timepatrol
+CONFIG_FILE=$CONFIG_DIR/config
 
 
 # CHECK IF RUNNING AS ROOT. ABORT IF FAILS.
@@ -31,13 +32,22 @@ else
 fi	
 
 
-## INSTALLS THE SCRIPT AND CONFIG FILE 
+## INSTALLS THE 'CONFIG' FILE. SKIP IF IT ALREADY EXISTS.
+mkdir -p $CONFIG_DIR
+if test -f $CONFIG_FILE; then
+    echo "* Found '$CONFIG_FILE'. Skipping 'config' installation."
+else
+	cp config $CONFIG_DIR
+	echo "* Installed 'config' file at '/etc/timepatrol'."
+fi
+
+
+
+# INSTALLS THE TIMEPATROL SCRIPT.
 chmod +x timepatrol
 cp timepatrol /usr/local/bin/
-mkdir -p $CONFIG_DIR
-cp config $CONFIG_DIR
 echo "* Installed 'timepatrol' at '/usr/local/bin'."
-echo "* Installed the 'config' file at '/etc/timepatrol'."
+
 
 ## INSTALLS HOOKS IF PACMAN IS FOUND.
 if command -v pacman &> /dev/null; then
