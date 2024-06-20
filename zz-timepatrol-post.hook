@@ -6,7 +6,7 @@ Type = Package
 Target = *
 
 [Action]
-Description = Performing timepatrol post snapshot...
+Description = Performing timepatrol post processing...
 When = PostTransaction
 Exec = /usr/share/libalpm/scripts/timepatrol-pacman post
 NeedsTargets
