@@ -18,7 +18,7 @@ if ! command -v ruby &> /dev/null; then
 	echo "'ruby' not found. ABORTED."
 	exit 1
 else
-	echo "* Found ruby at '$(command -v ruby)'. Proceeding."
+	echo "* Found '$(command -v ruby)'. Proceeding."
 fi
 
 
@@ -35,7 +35,7 @@ fi
 ## INSTALLS THE 'CONFIG' FILE. SKIP IF IT ALREADY EXISTS.
 mkdir -p $CONFIG_DIR
 if test -f $CONFIG_FILE; then
-    echo "* Found '$CONFIG_FILE'. Skipping 'config' installation."
+	echo "* Found '$CONFIG_FILE'. Skipping 'config' installation."
 else
 	cp config $CONFIG_DIR
 	echo "* Installed 'config' file at '/etc/timepatrol'."
