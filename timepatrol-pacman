@@ -1,10 +1,14 @@
 #!/usr/bin/ruby
 MAGIC_STRING = "@PACMAN-PRE-HOOK"
 
+
+
 def clean_pre_hook_lockfile(path)
   pacman_lock_file = "#{path}/data/var/lib/pacman/db.lck"
   if File.exists?(pacman_lock_file) then puts `rm #{pacman_lock_file}` end
 end
+
+
 
 def change_string(actions,path)
   info = File.read("#{path}/info")
@@ -13,39 +17,56 @@ def change_string(actions,path)
 end
 
 
+
+
 if ARGV[0] == 'pre'
   `/usr/local/bin/timepatrol snapshot #{MAGIC_STRING}`
 end
+
+
 
 if ARGV[0] == 'post'
   path = File.read('/tmp/timepatrol_last_snapshot').strip
   clean_pre_hook_lockfile(path)
 
+
+
   first_stage = []
   second_stage = []
   actions = ''
   
+
+
   pacman_log = (File.readlines '/var/log/pacman.log').reverse
   pacman_log.each do |line|
     if line.include? 'timepatrol-pre.hook' then break end
     first_stage<<line
   end
   
+
+
   first_stage.reverse.each do |line|
     if line.include? 'transaction completed' then break end
     unless line.include? 'transaction started' then second_stage<<line end
   end
   
+
+
   second_stage.each.with_index do |line,index|
     unless line.include?('[ALPM-SCRIPTLET]')
       actions += line.split('[ALPM]').last.strip
       if index + 1 < second_stage.length then actions += ', ' end
     end
   end
-  
+ 
+
+
   actions.gsub!('upgraded','upgrade')
   actions.gsub!('installed','install')
   actions.gsub!('removed','remove')
+  actions.gsub!('downgraded','downgrade')
+
+
 
   change_string(actions,path)
 end
