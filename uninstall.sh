@@ -3,8 +3,7 @@ PATH_LIBALPM=/usr/share/libalpm
 CONFIG_DIR=/etc/timepatrol
 
 
-## UNINSTALLS ALL SCRIPTS, THE WHOLE CONFIG FOLDER AND
-## PACMAN HOOKS IF EXIST.
+## UNINSTALLS ALL SCRIPTS AND PACMAN HOOKS IF EXIST.
 
 # CHECK IF RUNNING AS ROOT. ABORT IF FAILS.
 if [ "$EUID" -ne 0 ]; then 
@@ -18,7 +17,6 @@ rm -f $PATH_LIBALPM/scripts/timepatrol-*
 rm -f $PATH_LIBALPM/hooks/*-timepatrol-*.hook
 #rm -r -f $CONFIG_DIR
 
-echo ""
 echo "SUCCESS."
 echo ""
 echo "The '$CONFIG_DIR' configuration folder wasn't removed." 
