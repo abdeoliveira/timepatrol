@@ -24,6 +24,7 @@ def snapid
   return id_list.sort
 end
 
+
 def snapshot(comm,keep,fake)
   id = snapid.last.to_i + 1
   path = SNAPSHOTS_FOLDER + '/' + id.to_s
@@ -38,6 +39,7 @@ def snapshot(comm,keep,fake)
   info = "#{now};#{comm};#{kernel};#{keep}"
   File.write("#{path}/info",info,mode:'w')
 end
+
 
 
 def splitstr(string,shift)
@@ -58,6 +60,7 @@ def splitstr(string,shift)
   line.gsub!('/ ','/')
   return line
 end
+
 
 
 def readinfo(id)
@@ -110,6 +113,9 @@ def list(opt)
       comm   = readinfo(id)[2]
       kernel = readinfo(id)[3]
       keep   = readinfo(id)[4]
+      #=======
+      unless opt == 'list-verbose' then comm = comm[0..150].strip end
+      #=======
       
       space = 4 - id.to_s.size
       kspace = 15 - kernel.size
@@ -134,7 +140,7 @@ def list(opt)
     puts line
     puts "TOTAL: #{snapid.length}".bold
     
-    unless opt=='list' 
+    unless opt=='list' or 'list-verbose' 
       if opt == 'rollback' then opt += ' to' end
       opt = opt.magenta
       puts format_message("Select a snapshot to #{opt}\
@@ -368,7 +374,7 @@ if opt.include? 'snapshot'
 end
 
 
-if opt == 'list'
+if opt == 'list' or opt == 'list-verbose'
   list(opt)
 end
 
