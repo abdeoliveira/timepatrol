@@ -140,11 +140,11 @@ def list(opt)
     puts line
     puts "TOTAL: #{snapid.length}".bold
     
-    unless opt=='list' or 'list-verbose' 
+    unless opt == 'list' or opt == 'list-verbose'  
       if opt == 'rollback' then opt += ' to' end
       opt = opt.magenta
       puts format_message("Select a snapshot to #{opt}\
- or type any letter to ABORT:",0)
+       or type any letter to ABORT:",0)
     end
 
 end
