@@ -129,8 +129,7 @@ def list(opt)
       
       kk = ''
       if keep == '1' 
-        kk='*'.green.bold
-        space-=1 
+        kk='*'.green.bold; space-=1 
         id_string = id_string.green.bold 
       end
 
