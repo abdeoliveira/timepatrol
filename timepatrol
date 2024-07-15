@@ -120,14 +120,20 @@ def list(opt)
       space = 4 - id.to_s.size
       kspace = 15 - kernel.size
       
-      kk = ''
-      if keep == '1' then kk='*'.green.bold;space-=1 end
-      
+            
       id_string = colorline("[#{id}]",index)
       date = colorline(date,index)
       time = colorline(time,index)
       comm = colorline(comm,index)
       kernel = colorline(kernel,index)
+      
+      kk = ''
+      if keep == '1' 
+        kk='*'.green.bold
+        space-=1 
+        id_string = id_string.green.bold 
+      end
+
       
       puts ' '*space\
         +kk+\
