@@ -422,5 +422,6 @@ if opt == 'help'
   puts '          delete'
   puts '          rollback'
   puts '          list'
+  puts '          list-verbose'
 end
 
