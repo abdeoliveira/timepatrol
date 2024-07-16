@@ -233,11 +233,12 @@ end
 
 
 def select(selid)
+  special = false
   array_selected = []
   keyword = ['date=','time=','comment=','kernel=','keep=']
   
-  keyword.map {|k| if selid.include? k then @special=true; break end}
-  if @special
+  keyword.map {|k| if selid.include? k then special=true; break end}
+  if special
     5.times do |j|
       snapid.each do |id|
         string = readinfo(id)[j]
