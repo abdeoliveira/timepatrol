@@ -426,6 +426,7 @@ elsif   option == 'list' or option == 'list-verbose'
   list(option)
 
 elsif  option == 'list-grep'
+  selid ||= abort
   grep_string(select("comment="+selid),selid)
 
 elsif option == 'rollback'
