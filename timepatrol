@@ -318,18 +318,14 @@ end
 def repack
   puts "Repacking snapshots..."
   path = SNAPSHOTS_FOLDER+'/'
-  
   snapid.each.with_index do |v,j|
     from = path+v.to_s
     to = path+(j+1).to_s
-
     if from != to
       `mv #{from} #{to}`
       puts "#{v} --> #{j+1}"
     end
-
   end
-
 end
 
 
@@ -357,9 +353,9 @@ end
 
 def mark(array_selected)
   array_selected.each do |id|
-    file    = SNAPSHOTS_FOLDER+'/'+id.to_s+'/info' 
+    file = SNAPSHOTS_FOLDER+'/'+id.to_s+'/info' 
     date, time, comm, kernel = readinfo(id)
-    keep    = (-readinfo(id)[4].to_i+2)/2
+    keep = (-readinfo(id)[4].to_i+2)/2
     info = date+';'+time+';'+comm+';'+kernel+';'+keep.to_s
     File.write(file,info,mode:'w')
   end
@@ -392,12 +388,11 @@ end
 
 #=======================================
 
-
-
 unless ENV['USER'] == 'root'
   puts format_message("You must run as root. ABORTED.",1)
   abort
 end
+
 
 
 
@@ -447,6 +442,10 @@ elsif option == 'toggle-keep'
 
 elsif option == 'help' 
   help
+
+else
+  help
+  puts format_message("There is no '#{option}' option. ABORTED",1)
 
 end
 
