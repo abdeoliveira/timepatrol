@@ -74,95 +74,71 @@ def readinfo(id)
   kernel= info[3]
   keep  = info[4]
   comm  = splitstr(desc,45)
-  return [date,time,comm,kernel,keep]
+  return date,time,comm,kernel,keep
 end
 
 
 
 def colorline(string,index)
-  if index.odd? then string = string.white end
-  if index.even? then string = string.light_white end
-  return string
+    if index.odd? then string = string.white end
+    if index.even? then string = string.light_white end
+    return string
 end
 
 
 
 def list(opt)
+
+
+    nline = 84
     title = ":: TIMEPATROL SNAPSHOTS ::"
+    tlhalf = title.length/2
+
+    
     legend= ' '*3+"ID"\
       +' '*3+"DATE"\
       +' '*8+"TIME"\
       +' '*6+"KERNEL"\
       +' '*9+"COMMENT"
     
-    tlhalf = title.length/2
-    nline = 84
-    
-    line = ("-".light_white)*nline
-    lineline = ("=".light_white)*nline
-    
-    puts lineline
-    puts " "*(nline/2-tlhalf)+title.yellow.bold
+        
+    puts lineline = ("=".light_white)*nline
+    puts " "*(nline/2-tlhalf) + title.yellow.bold
     puts lineline
     puts legend.bold
+
     
     snapid.each.with_index do |id,index|
-    
-      date   = readinfo(id)[0]
-      time   = readinfo(id)[1]
-      comm   = readinfo(id)[2]
-      kernel = readinfo(id)[3]
-      keep   = readinfo(id)[4]
-      #=======
+      date, time, comm, kernel, keep = readinfo(id)
       unless opt == 'list-verbose' then comm = comm[0..150].strip end
-      #=======
-      
-      space = 4 - id.to_s.size
-      kspace = 15 - kernel.size
-      
-            
-      id_string = colorline("[#{id}]",index)
-      date = colorline(date,index)
-      time = colorline(time,index)
-      comm = colorline(comm,index)
-      kernel = colorline(kernel,index)
-      
-      kk = ''
-      if keep == '1' 
-        kk='*'.green.bold; space-=1 
-        id_string = id_string.green.bold 
-      end
-
-      
-      puts ' '*space\
-        +kk+\
-        +id_string+\
-        +' '*2+date\
-        +' '*2+time\
-        +' '*2+kernel\
-        +' '*kspace+comm
+      showinfo(id,date,time,comm,kernel,keep,index)
     end
-    puts line
+
+
+    puts line = ("-".light_white)*nline
     puts "TOTAL: #{snapid.length}".bold
+    
     
     unless opt == 'list' or opt == 'list-verbose'  
       if opt == 'rollback' then opt += ' to' end
       opt = opt.magenta
       puts format_message("Select a snapshot to #{opt}\
-       or type any letter to ABORT:",0)
+ or type any letter to ABORT:",0)
     end
 
 end
 
 
-def rollback
+def rollback(array_selected)
   countdown = 10 # seconds before rebooting
-  rollid = @array_selected.first 
+  rollid = array_selected.first 
   kernel_from = `uname -r`.chomp 
   kernel_to = readinfo(rollid)[3]
 
-  if @array_selected.length != 1 then puts format_message("You\
+
+  if array_selected.length != 1 then puts format_message("You\
  must choose a single ID. ABORTED.",1);abort end
+
 
   if kernel_from != kernel_to
     puts format_message("Running kernel (#{kernel_from}) is\
@@ -170,8 +146,12 @@ def rollback
     abort
   end
   
+
   puts format_message("Rolling back to the following snapshot:",0)
-  puts showinfo(rollid).cyan
+  date, time, comm, kernel, keep = readinfo(rollid)
+  showinfo(rollid, date, time, comm, kernel, keep, 1)
+
+
   puts format_message("Confirm? [y/N]",2)
   
   if STDIN.gets.chomp == 'y' 
@@ -186,8 +166,7 @@ def rollback
    
 
     id = snapid.last + 1
-    date = readinfo(rollid)[0]
-    time = readinfo(rollid)[1]
+    date, time = readinfo(rollid)
 
     snapshot("PRE: rollback to [#{date} #{time}]",0,true) 
     
@@ -221,14 +200,33 @@ end
 
 
 
-def showinfo(id)
-  date = readinfo(id)[0]
-  time = readinfo(id)[1]
-  comm = readinfo(id)[2]
-  kernel = readinfo(id)[3]
-  space = " "*(3 - id.to_s.length)
-  return "#{space} [#{id}] #{date} #{time} #{kernel} #{comm}" 
+def showinfo(id,date,time,comm,kernel,keep,index)
+  space = 4 - id.to_s.size
+  kspace = 15 - kernel.size
+  
+  id_string = colorline("[#{id}]",index)
+  date = colorline(date,index)
+  time = colorline(time,index)
+  comm = colorline(comm,index)
+  kernel = colorline(kernel,index)
+  
+  kk = ''
+  if keep == '1' 
+    kk='*'.green.bold; space-=1 
+    id_string = id_string.green.bold 
+  end
+  
+  puts ' '*space\
+    +kk+\
+    +id_string+\
+    +' '*2+date\
+    +' '*2+time\
+    +' '*2+kernel\
+    +' '*kspace+comm
 end
+
+
+
 
 
 def select(selid)
@@ -271,22 +269,36 @@ def select(selid)
     abort
   end
 
-  return @array_selected = array_selected
+  return array_selected
 end
 
 
 
-def delete
-  @array_selected.each do |id|
-      puts showinfo(id).cyan
+def grep_string(array_selected,substring)
+  array_selected.each do |id|
+     date, time, comm, kernel, keep = readinfo(id)
+     comm.gsub!(substring,substring.bold)
+     showinfo(id,date,time,comm,kernel,keep,1)
   end
+end
+
+
+
+def delete(array_selected)
+
+  array_selected.each.with_index do |id,index|
+    date,time,comm,kernel,keep = readinfo(id)
+    showinfo(id,date,time,comm,kernel,keep,index)
+  end
+
 
   puts format_message("Confirm deletion of the selected snapshot(s) above? [y/N]",2)
   ans = STDIN.gets.chomp
-  
+
+
   if ans == 'y' 
     puts format_message("Confirmed.",0)
-    @array_selected.each do |id|
+    array_selected.each do |id|
       code1 = `btrfs subvolume delete #{SNAPSHOTS_FOLDER}/#{id}/data; echo $?`.to_i
       code2 = `rm -r #{SNAPSHOTS_FOLDER}/#{id}; echo $?`.to_i 
       if code1.abs+code2.abs > 0 then puts "FAILED deleting snapshot [#{id}]." end
@@ -296,6 +308,8 @@ def delete
   end
 
 end
+
+
 
 
 def repack
@@ -338,13 +352,10 @@ def prune
 end
 
 
-def mark
-  @array_selected.each do |id|
+def mark(array_selected)
+  array_selected.each do |id|
     file    = SNAPSHOTS_FOLDER+'/'+id.to_s+'/info' 
-    date    = readinfo(id)[0]
-    time    = readinfo(id)[1]
-    comm    = readinfo(id)[2]
-    kernel  = readinfo(id)[3]
+    date, time, comm, kernel = readinfo(id)
     keep    = (-readinfo(id)[4].to_i+2)/2
     info = date+';'+time+';'+comm+';'+kernel+';'+keep.to_s
     File.write(file,info,mode:'w')
@@ -384,6 +395,11 @@ if opt == 'list' or opt == 'list-verbose'
 end
 
 
+if opt == 'list-grep'
+  grep_string(select("comment="+selid),selid)
+end
+
+
 if opt == 'rollback'
   if Dir.exists? MOUNT_POINT then puts format_message("The '#{MOUNT_POINT}'\
  folder shouldn't exist. ABORTED.",1); abort end
@@ -392,7 +408,7 @@ if opt == 'rollback'
     selid = STDIN.gets.chomp
     if_letter_then_abort(selid) 
   end
-    select(selid); rollback
+    rollback(select(selid))
 end
 
 
@@ -402,7 +418,7 @@ if opt == 'delete'
     selid = STDIN.gets.chomp
     if_letter_then_abort(selid)
   end
-  select(selid); delete
+  delete(select(selid))
 end
 
 
@@ -412,7 +428,7 @@ if opt == 'toggle-keep'
     selid = STDIN.gets.chomp
     if_letter_then_abort(selid)
   end
-  select(selid); mark
+  mark(select(selid))
 end
 
 
