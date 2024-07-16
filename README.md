@@ -163,7 +163,7 @@ Copy and paste the following line to your `~/.bashrc`:
 
 ```
 complete -W 'snapshot snapshot-keep toggle-keep delete rollback list 
-list-verbose help' timepatrol
+list-verbose list-grep help' timepatrol
 ```
 
 ## Periodic, automatic snapshots
