@@ -269,7 +269,7 @@ def select(selid)
   end
   
   if array_selected.empty?
-    puts format_message("No snapshot meets the given criteria. ABORTED.",1)
+    puts format_message("No snapshot meets the given criteria.",1)
     abort
   end
 
