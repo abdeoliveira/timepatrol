@@ -30,7 +30,7 @@ def snapshot(comm,keep,fake)
   path = SNAPSHOTS_FOLDER + '/' + id.to_s
   kernel = `uname -r`.chomp
   `mkdir #{path}`
-  if comm.nil? then comm = '' end
+  comm ||= ''
   unless fake 
     puts `btrfs subvolume snapshot / #{path}/data` 
     File.write('/tmp/timepatrol_last_snapshot',path,mode:'w')
