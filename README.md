@@ -83,8 +83,10 @@ given comment.
 * `snapshot-keep 'OPTIONAL COMMENT'`: same as above plus it adds a protection against 
 automatice deletion. Automatic deletion is set via the `MAXIMUM_SNAPSHOTS` 
 variable in the `/etc/timepatrol/config` file. 
-Protected snapshots have a green mark close to their `ID` when `list`ed.
-Protected snapshots will not count against the `MAXIMUM_SNAPSHOTS` variable.
+Protected snapshots are listed with `ID` in green color and
+they do not count against the `MAXIMUM_SNAPSHOTS` variable.
+For example, if 2 snapshots are protected and `MAXIMUM_SNAPSHOTS = 20`,
+then the maximum number of snapshots will be 22. 
 
 * `delete`: deletes a snapshot. It accepts individual `ID` numbers and ranges. 
 For example: `sudo timepatrol delete 1,10,20-23` will delete snapshots whose 

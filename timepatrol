@@ -414,7 +414,7 @@ if option == 'snapshot' or option == 'snapshot-keep'
   if option == 'snapshot-keep' then keep = 1 end 
   snapshot(selid,keep,false)
   if snapid.length >= MAXIMUM_SNAPSHOTS then prune end
-  if snapid.last > 900 then repack end
+  if snapid.last > 9990 then repack end
 
 elsif   option == 'list' or option == 'list-verbose'
   list(option)
