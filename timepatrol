@@ -213,22 +213,15 @@ def showinfo(id,date,time,comm,kernel,keep,index)
   comm = colorline(comm,index)
   kernel = colorline(kernel,index)
   
-  kk = ''
-  if keep == '1' 
-    kk='*'.green.bold; space-=1 
-    id_string = id_string.green.bold 
-  end
+  if keep == '1' then id_string = id_string.green.bold   end
   
   puts ' '*space\
-    +kk+\
     +id_string+\
     +' '*2+date\
     +' '*2+time\
     +' '*2+kernel\
     +' '*kspace+comm
 end
-
-
 
 
 
