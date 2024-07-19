@@ -4,7 +4,6 @@
 
 ![Alt text](/media/0.png?raw=true "Timepatrol in action!")
 
-<video src='/media/sample.mp4' width=180/>
 
 Timepatrol is a BTRFS snapshot manager and a rollback tool in a single script.
 There are great tools out there which do the same, like Timeshift and Snapper,
