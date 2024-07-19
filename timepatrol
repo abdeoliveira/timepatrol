@@ -204,8 +204,8 @@ end
 
 
 def showinfo(id,date,time,comm,kernel,keep,index)
-  space = 4 - id.to_s.size
-  kspace = 15 - kernel.size
+  id_space = 4 - id.to_s.size
+  kernel_space = 15 - kernel.size
   
   id_string = colorline("[#{id}]",index)
   date = colorline(date,index)
@@ -215,12 +215,12 @@ def showinfo(id,date,time,comm,kernel,keep,index)
   
   if keep == '1' then id_string = id_string.green.bold   end
   
-  puts ' '*space\
+  puts ' '*id_space\
     +id_string+\
     +' '*2+date\
     +' '*2+time\
     +' '*2+kernel\
-    +' '*kspace+comm
+    +' '*kernel_space+comm
 end
 
 
