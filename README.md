@@ -82,7 +82,7 @@ Type `sudo timepatrol help` for a basic list of commands. They are
 given comment.
 
 * `snapshot-keep 'OPTIONAL COMMENT'`: same as above plus it adds a protection against 
-automatice deletion. Automatic deletion is set via the `MAXIMUM_SNAPSHOTS` 
+automatic deletion. Automatic deletion is set via the `MAXIMUM_SNAPSHOTS` 
 variable in the `/etc/timepatrol/config` file. 
 Protected snapshots are listed with `ID` in green color and
 they do not count against the `MAXIMUM_SNAPSHOTS` variable.
@@ -165,8 +165,7 @@ section also.
 Copy and paste the following line to your `~/.bashrc`:
 
 ```
-complete -W 'snapshot snapshot-keep toggle-keep delete rollback list 
-list-verbose list-grep help' timepatrol
+complete -W 'snapshot snapshot-keep toggle-keep delete rollback list list-verbose list-grep help' timepatrol
 ```
 
 ## Periodic, automatic snapshots
