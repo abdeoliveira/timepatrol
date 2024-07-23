@@ -2,6 +2,16 @@
 require 'colorize'
 load '/etc/timepatrol/config'
 
+
+def is_root
+  unless ENV['USER'] == 'root'
+    puts format_message("You must run as root. ABORTED.",1)
+    abort
+  end
+end
+
+
+
 def first_run
   message1 = "It seems this is your first run." 
   message2 = "Please edit the '/etc/timepatrol/config' file first."
@@ -14,6 +24,7 @@ def first_run
     abort
   end
 end
+
 
 
 def now
@@ -396,14 +407,9 @@ end
 
 #=======================================
 
-unless ENV['USER'] == 'root'
-  puts format_message("You must run as root. ABORTED.",1)
-  abort
-end
-
+is_root
 
 first_run
-
 
 option = ARGV[0]
 selid = ARGV[1]
