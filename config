@@ -1,3 +1,6 @@
+# Delete the '#FIRST_RUN' entry below after editing this file as per your system.
+#FIRST_RUN
+
 # DEVICE is where lies your root partition. It will be something like
 # /dev/sda1, /dev/nvme0n1p1 and so son. For encrypted roots,
 # it will be something like /dev/mapper/something. 
@@ -14,9 +17,8 @@ ROOT_VOLUME = '@'
 
 # The mamixum number of snapshots to be kept. Protected snapshots
 # will not count against the MAXIMUM_SNAPSHOTS number.
-# Do NOT use ''.
-MAXIMUM_SNAPSHOTS = 50
+MAXIMUM_SNAPSHOTS = '50'
 
 # A temporary location to be used by Timepatrol when performing rollbacks.
-# It will be created on demand and deleted afterwards. 
+# It will be created on demand and deleted afterwards. You can pick any name
 MOUNT_POINT = '/mnt/timepatroltmp'

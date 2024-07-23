@@ -2,6 +2,20 @@
 require 'colorize'
 load '/etc/timepatrol/config'
 
+def first_run
+  message1 = "It seems this is your first run." 
+  message2 = "Please edit the '/etc/timepatrol/config' file first."
+  message3 = "Then, delete the '#FIRST_RUN' entry."
+  config = File.read('/etc/timepatrol/config')
+  if config.include? '#FIRST_RUN'
+    puts format_message(message1,0)
+    puts format_message(message2,0)
+    puts format_message(message3,0)
+    abort
+  end
+end
+
+
 def now
  Time.new.strftime "%Y.%m.%d;%H:%M:%S"
 end
@@ -262,7 +276,7 @@ def select(selid)
   end
   
   if array_selected.empty?
-    puts format_message("No snapshot meets the given criteria.",1)
+    puts format_message("No snapshot.",1)
     abort
   end
 
@@ -327,7 +341,7 @@ def prune
   count = 0
   keep_count = 0
   snapid.map{ |id| if readinfo(id)[4]=='1' then keep_count+=1 end }
-  maxdel = snapid.length - (MAXIMUM_SNAPSHOTS + keep_count)
+  maxdel = snapid.length - (MAXIMUM_SNAPSHOTS.to_i + keep_count)
   
   snapid.each do |id|
     if count >= maxdel then break end
@@ -335,7 +349,7 @@ def prune
       code1 = `btrfs subvolume delete #{SNAPSHOTS_FOLDER}/#{id}/data; echo $?`.to_i
       code2 = `rm -r #{SNAPSHOTS_FOLDER}/#{id}; echo $?`.to_i 
       if code1.abs + code2.abs > 0 
-        puts "FAILED pruning snapshot [#{id}]. ABORTED."
+        puts "FAILED pruning snapshot [#{id}]."
       else
         puts "pruning snapshot [#{id}]."
         count += 1
@@ -349,7 +363,7 @@ def mark(array_selected)
   array_selected.each do |id|
     file = SNAPSHOTS_FOLDER+'/'+id.to_s+'/info' 
     date, time, comm, kernel = readinfo(id)
-    keep = (-readinfo(id)[4].to_i+2)/2
+    keep = (-readinfo(id)[4].to_i + 2)/2
     info = date+';'+time+';'+comm+';'+kernel+';'+keep.to_s
     File.write(file,info,mode:'w')
   end
@@ -365,11 +379,11 @@ end
 
 
 def help
-  puts '------------------------------'.bold
-  puts 'USAGE:    timepatrol [COMMAND]'.bold
-  puts '------------------------------'.bold
-  puts 'COMMANDS:'.yellow.bold
-  puts "          snapshot 'COMMENT'"
+  space = 30
+  puts line = ('-'.*space).bold
+  puts 'USAGE:'.yellow.bold + ' timepatrol [COMMAND]'.bold
+  puts line
+  puts 'COMMANDS:'.yellow.bold + " snapshot 'COMMENT'"
   puts "          snapshot-keep 'COMMENT'"
   puts "          toggle-keep"
   puts '          delete'
@@ -380,7 +394,6 @@ def help
 end
 
 
-
 #=======================================
 
 unless ENV['USER'] == 'root'
@@ -389,13 +402,12 @@ unless ENV['USER'] == 'root'
 end
 
 
+first_run
 
 
 option = ARGV[0]
 selid = ARGV[1]
 option ||= 'help' 
-
-
 
 
 special_options = ['delete','rollback','toggle-keep']
@@ -407,13 +419,11 @@ end
 
 
 
-
-
 if option == 'snapshot' or option == 'snapshot-keep'
   keep = 0
   if option == 'snapshot-keep' then keep = 1 end 
   snapshot(selid,keep,false)
-  if snapid.length >= MAXIMUM_SNAPSHOTS then prune end
+  if snapid.length >= MAXIMUM_SNAPSHOTS.to_i then prune end
   if snapid.last > 9990 then repack end
 
 elsif   option == 'list' or option == 'list-verbose'
