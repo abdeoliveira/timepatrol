@@ -238,7 +238,10 @@ def showinfo(id,date,time,comm,kernel,keep,index)
   comm = colorline(comm,index)
   kernel = colorline(kernel,index)
   
-  if keep == '1' then id_string = id_string.green.bold   end
+  if keep == '1' 
+    id_string = ('*'+id_string).green.bold   
+    id_space -= 1
+  end
   
   puts ' '*id_space\
     +id_string+\
@@ -429,7 +432,7 @@ if option == 'snapshot' or option == 'snapshot-keep'
   if option == 'snapshot-keep' then keep = 1 end 
   snapshot(selid,keep,false)
   if snapid.length >= MAXIMUM_SNAPSHOTS.to_i then prune end
-  if snapid.last > 9990 then repack end
+  if snapid.last > 990 then repack end
 
 elsif   option == 'list' or option == 'list-verbose'
   list(option)
