@@ -84,7 +84,8 @@ given comment.
 * `snapshot-keep 'OPTIONAL COMMENT'`: same as above plus it adds a protection against 
 automatic deletion. Automatic deletion is set via the `MAXIMUM_SNAPSHOTS` 
 variable in the `/etc/timepatrol/config` file. 
-Protected snapshots are listed with `ID` in green color and
+Protected snapshots are listed with `ID` in green color
+and have a `*` mark, and
 they do not count against the `MAXIMUM_SNAPSHOTS` variable.
 For example, if 2 snapshots are protected and `MAXIMUM_SNAPSHOTS = 20`,
 then the maximum number of snapshots will be 22. 
