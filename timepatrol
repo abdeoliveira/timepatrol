@@ -98,7 +98,7 @@ def readinfo(id)
   desc  = info[2]
   kernel= info[3]
   keep  = info[4]
-  comm  = splitstr(desc,45)
+  comm  = splitstr(desc,46)
   return date,time,comm,kernel,keep
 end
 
@@ -127,7 +127,7 @@ def list(opt)
       +' '*3+"DATE"\
       +' '*8+"TIME"\
       +' '*6+"KERNEL"\
-      +' '*9+"COMMENT"
+      +' '*10+"COMMENT"
     
         
     puts lineline = ("=".light_white)*nline
@@ -230,7 +230,7 @@ end
 
 def showinfo(id,date,time,comm,kernel,keep,index)
   id_space = 4 - id.to_s.size
-  kernel_space = 15 - kernel.size
+  kernel_space = 16 - kernel.size
   
   id_string = colorline("[#{id}]",index)
   date = colorline(date,index)
