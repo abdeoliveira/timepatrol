@@ -25,6 +25,13 @@ def first_run
   end
 end
 
+def max_snapshots_limit
+  if MAXIMUM_SNAPSHOTS.to_i > 999
+    puts format_message("'MAXIMUM_SNAPSHOTS' variable must be < 1000.",0)
+    abort
+  end
+end
+
 
 
 def now
@@ -412,6 +419,7 @@ end
 
 is_root
 first_run
+max_snapshots_limit
 
 option = ARGV[0]
 selid = ARGV[1]
