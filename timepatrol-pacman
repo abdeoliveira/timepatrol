@@ -5,7 +5,7 @@ MAGIC_STRING = "@PACMAN-PRE-HOOK"
 
 def clean_pre_hook_lockfile(path)
   pacman_lock_file = "#{path}/data/var/lib/pacman/db.lck"
-  if File.exists?(pacman_lock_file) then puts `rm #{pacman_lock_file}` end
+  if File.exist?(pacman_lock_file) then puts `rm #{pacman_lock_file}` end
 end
 
 
