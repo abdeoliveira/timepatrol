@@ -27,9 +27,8 @@ very handy in the day-to-day use.
 This is an early, experimental project. DO NOT use in a
 production environment!
 
-## Dependencies
+## Dependency
 * `ruby`
-* `gem colorize` (as ROOT) 
 
 ## Installation
 
