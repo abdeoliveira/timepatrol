@@ -1,7 +1,24 @@
 #!/usr/bin/ruby
-require 'colorize'
 load '/etc/timepatrol/config'
 
+class String
+
+  def colorize(code1,code2)
+    if DISABLE_COLORS != 'true'
+      "\e[#{code1}m#{self}\e[#{code2}m"  
+    else
+      self
+    end
+  end
+
+  def red;     colorize(31,0) end
+  def green;   colorize(32,0) end
+  def yellow;  colorize(33,0) end
+  def blue;    colorize(34,0) end
+  def magenta; colorize(35,0) end
+  def grey;    colorize(37,0) end
+  def bold;    colorize(1,22) end
+end
 
 def is_root
   unless ENV['USER'] == 'root'
@@ -75,7 +92,7 @@ end
 
 
 def splitstr(string,shift)
-  max = 35
+  max = MAX_CHARACTERS_COMMENT.to_i
   line = ''
   total = 0
   string.gsub!('/','/ ')
@@ -113,9 +130,9 @@ end
 
 def colorline(string,index)
   if index.odd? 
-    string = string.white 
+    string = string.grey
   else
-    string.light_white 
+    string
   end
   return string
 end
@@ -125,7 +142,7 @@ end
 def list(opt)
 
 
-    nline = 84
+  nline = 6+10+8+14+8+2 + MAX_CHARACTERS_COMMENT.to_i
     title = ":: TIMEPATROL SNAPSHOTS ::"
     tlhalf = title.length/2
 
@@ -137,7 +154,7 @@ def list(opt)
       +' '*10+"COMMENT"
     
         
-    puts lineline = ("=".light_white)*nline
+    puts lineline = "="*nline
     puts " "*(nline/2-tlhalf) + title.yellow.bold
     puts lineline
     puts legend.bold
@@ -150,7 +167,7 @@ def list(opt)
     end
 
 
-    puts line = ("-".light_white)*nline
+    puts line = "-"*nline
     puts "TOTAL: #{snapid.length}".bold
     
     
@@ -238,20 +255,20 @@ end
 def showinfo(id,date,time,comm,kernel,keep,index)
   id_space = 4 - id.to_s.size
   kernel_space = 16 - kernel.size
-  
+ 
   id_string = colorline("[#{id}]",index)
   date = colorline(date,index)
   time = colorline(time,index)
   comm = colorline(comm,index)
   kernel = colorline(kernel,index)
-  
+
   if keep == '1' 
-    id_string = ('*'+id_string).green.bold   
+    id_string = '*'.green.bold + id_string
     id_space -= 1
   end
   
   puts ' '*id_space\
-    +id_string+\
+    +id_string\
     +' '*2+date\
     +' '*2+time\
     +' '*2+kernel\

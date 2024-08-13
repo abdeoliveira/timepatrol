@@ -23,13 +23,13 @@ fi
 
 
 # CHECK FOR ROOT GEM COLORIZE. ABORT IF FAILS.
-if ! gem list -i "^colorize$" &> /dev/null; then
-	echo "* Could not find 'gem colorize' for root. ABORTED"
-	echo "SUGGESTION: run 'gem install colorize' as ROOT."
-	exit 1
-else
-	echo "* Found root gem colorize. Proceeding."
-fi	
+#if ! gem list -i "^colorize$" &> /dev/null; then
+#	echo "* Could not find 'gem colorize' for root. ABORTED"
+#	echo "SUGGESTION: run 'gem install colorize' as ROOT."
+#	exit 1
+#else
+#	echo "* Found root gem colorize. Proceeding."
+#fi	
 
 
 ## INSTALLS THE 'CONFIG' FILE. SKIP IF IT ALREADY EXISTS.

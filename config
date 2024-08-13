@@ -6,10 +6,10 @@
 # it will be something like /dev/mapper/something. 
 DEVICE = '/dev/mapper/root' 
 
-# The folder below will hold your snapshots. 
+# The folder to hold your snapshots. 
 SNAPSHOTS_FOLDER = '/.snapshots'
 
-# The volume associated to the SNAPSHOTS_FOLDER above.
+# Subvolume associated to the SNAPSHOTS_FOLDER.
 SNAPSHOTS_VOLUME = '@snapshots'
 
 # The root subvolume.
@@ -17,8 +17,15 @@ ROOT_VOLUME = '@'
 
 # The mamixum number of snapshots to be kept. 
 # Protected snapshots will not count against the MAXIMUM_SNAPSHOTS number.
-MAXIMUM_SNAPSHOTS = '50'
+MAXIMUM_SNAPSHOTS = '60'
+
+# Maximum number of characters to fit in each line of comment's block.
+MAX_CHARACTERS_COMMENT = '35'
 
 # A temporary location to be used by Timepatrol when performing rollbacks.
 # It will be created on demand and deleted afterwards. You can pick any name
 MOUNT_POINT = '/mnt/timepatroltmp'
+
+# Set it to 'true' if you don't want colors.
+DISABLE_COLORS = ''
+
