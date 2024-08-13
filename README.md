@@ -34,7 +34,7 @@ production environment!
 
 Run the `install.sh` script. 
 
-*Note:* If `pacman` is found, it will also installs pacman hooks and 
+*Note:* If `pacman` is found, it will also install pacman hooks and 
 the auxiliary script `timepatrol-pacman`.
 
 ## Uninstall
