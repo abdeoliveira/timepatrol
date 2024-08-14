@@ -20,7 +20,7 @@ end
 
 
 if ARGV[0] == 'pre'
-  `/usr/local/bin/timepatrol snapshot #{MAGIC_STRING}`
+  `/usr/bin/timepatrol snapshot #{MAGIC_STRING}`
 end
 
 
