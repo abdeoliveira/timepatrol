@@ -130,11 +130,10 @@ end
 
 def colorline(string,index)
   if index.odd? 
-    string = string.grey
+    string.grey
   else
     string
   end
-  return string
 end
 
 
