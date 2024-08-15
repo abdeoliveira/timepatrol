@@ -13,6 +13,14 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
+# CHECK FOR BTRFS EXECUTABLE. ABORT IF FAILS.
+if ! command -v btrfs &> /dev/null; then
+	echo "'btrfs' not found. ABORTED"
+	exit 1
+else
+	echo "* Found '$(command -v btrfs)'. Proceeding."
+fi
+
 
 # CHECK FOR INSTALLED RUBY. ABORT IF FAILS.
 if ! command -v ruby &> /dev/null; then
@@ -20,15 +28,6 @@ if ! command -v ruby &> /dev/null; then
 	exit 1
 else
 	echo "* Found '$(command -v ruby)'. Proceeding."
-fi
-
-
-# CHECK FOR BTRFS EXECUTABLE. ABORT IF FAILS.
-if ! command -v btrfs &> /dev/null; then
-	echo "'btrfs' not found. ABORTED"
-	exit 1
-else
-	echo "* Found '$(command -v btrfs)'. Proceeding."
 fi
 
 
