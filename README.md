@@ -10,10 +10,9 @@ There are great tools out there which do the same, like Timeshift and Snapper,
 for example, but I still prefer Timepatrol because:
 
 * Easy to rollback to any snapshot.
-* Minimal dependencies (ruby).
+* Minimal dependency: `ruby`.
 * Outputs fit in half screen. Perfect for window manager users. 
-* It has colors. ;-)
-* I like to code even I'm not a professional programmer. 
+* It has colors! Although it can be disabled.
 
 In fact, it was written based on my personal needs but it may 
 be of interest of a few people also. 
@@ -32,20 +31,22 @@ production environment!
 
 ## Installation
 
-Run the `install.sh` script. 
+1. Clone the repo: `git clone https://github.com/abdeoliveira/timepatrol`
+2. Enter the cloned folder: `cd timepatrol`
+3. Make the `install.sh` script executable and run it: `chmod +x install.sh && sudo ./install.sh`. 
 
-*Note:* If `pacman` is found, it will also install pacman hooks and 
-the auxiliary script `timepatrol-pacman`.
+*Note:* If `pacman` is found, pacman hooks and 
+the auxiliary script `timepatrol-pacman` will be installed.
 
 ## Uninstall
 
-Run the `uninstall.sh` script.
+* Run the `uninstall.sh` script: `chmod +x uninstall.sh && sudo ./uninstall.sh`
 
 
 ## Configuration 
-Adjust the `/etc/timepatrol/config` file as per your system.
+Adjust the `/etc/timepatrol/config` file as per your system. Check the comments in file for directions.
 
-A note regarding `/etc/fstab`: The default installation in some distributions 
+**A note regarding `/etc/fstab`**: The default installation in some distributions 
 (Arch for instance) include the `subvolid` information in `fstab` for mounting 
 points. Since rollbacks change such a number I recommend you omit the `subvolid` 
 in the `/` entry. Mine reads as follows:
