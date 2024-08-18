@@ -1,0 +1,2 @@
+complete -W 'snapshot snapshot-keep toggle-keep delete \
+	rollback list list-verbose help list-grep' timepatrol
