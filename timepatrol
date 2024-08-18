@@ -1,4 +1,5 @@
 #!/usr/bin/ruby
+
 if File.file? '/etc/timepatrol/config'
   load '/etc/timepatrol/config'
 else
