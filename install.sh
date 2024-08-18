@@ -30,7 +30,7 @@ else
 fi
 
 
-# INSTALLS TIMEPATROL.
+# INSTALL TIMEPATROL.
 install -Dm 755 timepatrol -t $SRC_DIR/
 echo "* Installed 'timepatrol' at '$SRC_DIR'."
 
