@@ -1,6 +1,3 @@
-# Delete the '#FIRST_RUN' entry below after editing this file as per your system.
-#FIRST_RUN
-
 # DEVICE is where lies your root partition. It will be something like
 # /dev/sda1, /dev/nvme0n1p1 and so son. For encrypted roots,
 # it will be something like /dev/mapper/something. 

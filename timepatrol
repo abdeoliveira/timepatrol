@@ -1,5 +1,13 @@
 #!/usr/bin/ruby
-load '/etc/timepatrol/config'
+if File.file? '/etc/timepatrol/config'
+  load '/etc/timepatrol/config'
+else
+  puts "It seems this is your first run." 
+  puts "You must 'sudo cp /etc/timepatrol/config-example /etc/timepatrol/config',"
+  puts "then edit 'config' according to your system."
+  puts 'ABORTED.'
+  abort
+end
 
 class String
 
@@ -29,18 +37,6 @@ end
 
 
 
-def first_run
-  message1 = "It seems this is your first run." 
-  message2 = "Please edit the '/etc/timepatrol/config' file first."
-  message3 = "Then, delete the '#FIRST_RUN' entry."
-  config = File.read('/etc/timepatrol/config')
-  if config.include? '#FIRST_RUN'
-    puts format_message(message1,0)
-    puts format_message(message2,0)
-    puts format_message(message3,0)
-    abort
-  end
-end
 
 def max_snapshots_limit
   if MAXIMUM_SNAPSHOTS.to_i > 999
@@ -434,7 +430,6 @@ end
 #=======================================
 
 is_root
-first_run
 max_snapshots_limit
 
 option = ARGV[0]

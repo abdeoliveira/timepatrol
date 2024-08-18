@@ -4,7 +4,6 @@ set -e
 PATH_LIBALPM=/usr/share/libalpm
 CONFIG_DIR=/etc/timepatrol
 SRC_DIR=/usr/bin
-CONFIG_FILE=$CONFIG_DIR/config
 
 
 # CHECK IF RUNNING AS ROOT. ABORT IF FAILS.
@@ -31,19 +30,13 @@ else
 fi
 
 
-## INSTALLS THE 'CONFIG' FILE. SKIP IF IT ALREADY EXISTS.
-if test -f $CONFIG_FILE; then
-	echo "* Found '$CONFIG_FILE'. Skipping 'config' installation."
-else
-	install -Dm 644 config -t $CONFIG_DIR/
-	echo "* Installed 'config' file at '$CONFIG_DIR'."
-fi
-
-
-
 # INSTALLS TIMEPATROL.
 install -Dm 755 timepatrol -t $SRC_DIR/
 echo "* Installed 'timepatrol' at '$SRC_DIR'."
+
+# INSTALL CONFIG FILE
+install -Dm 644 config-example -t $CONFIG_DIR/
+echo "* Installed the 'config-example' file at '$CONFIG_DIR'"
 
 
 ## INSTALL HOOKS IF PACMAN IS FOUND.
