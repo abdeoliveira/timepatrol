@@ -44,11 +44,11 @@ aura -A timepatrol-git
 ### Other Linux
 1. Clone: `git clone https://github.com/abdeoliveira/timepatrol`
 2. Enter: `cd timepatrol`
-3. Run: `sudo ./install.sh`. 
+3. Run: `sudo ./install.sh` 
 
 ## Uninstall
 
-* Run: `sudo ./uninstall.sh`
+* Run: `sudo rm -r /usr/bin/timepatrol /etc/timepatrol`
 
 
 ## Configuration 
@@ -58,7 +58,7 @@ Copy the example configuration file as
 cp /etc/timepatrol/config-example /etc/timepatrol/config
 ```
 
-check the comments within for directions and adjust it as per your system. 
+Then, check the comments in `config` for directions and adjust it as per your system. 
 
 **A note regarding `/etc/fstab`**: The default installation in some distributions 
 (Arch for instance) include the `subvolid` information in `fstab` for mounting 
