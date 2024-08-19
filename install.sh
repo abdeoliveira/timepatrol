@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-PATH_LIBALPM=/usr/share/libalpm
+#PATH_LIBALPM=/usr/share/libalpm
 CONFIG_DIR=/etc/timepatrol
 SRC_DIR=/usr/bin
 
@@ -40,13 +40,13 @@ echo "* Installed the 'config-example' file at '$CONFIG_DIR'"
 
 
 ## INSTALL HOOKS IF PACMAN IS FOUND.
-if command -v pacman &> /dev/null; then
-	install -Dm 755 timepatrol-pacman -t $PATH_LIBALPM/scripts/
-	install -Dm 644 05-timepatrol-pre.hook -t $PATH_LIBALPM/hooks/
-	install -Dm 644 zz-timepatrol-post.hook -t $PATH_LIBALPM/hooks/
-	echo "* Found 'pacman':  * installed hooks at '$PATH_LIBALPM/hooks'."
-	echo "                   * installed auxiliary script 'timepatrol-pacman' at"
-	echo "                     '$PATH_LIBALPM/scripts'."
-fi
+#if command -v pacman &> /dev/null; then
+#	install -Dm 755 timepatrol-pacman -t $PATH_LIBALPM/scripts/
+#	install -Dm 644 05-timepatrol-pre.hook -t $PATH_LIBALPM/hooks/
+#	install -Dm 644 zz-timepatrol-post.hook -t $PATH_LIBALPM/hooks/
+#	echo "* Found 'pacman':  * installed hooks at '$PATH_LIBALPM/hooks'."
+#	echo "                   * installed auxiliary script 'timepatrol-pacman' at"
+#	echo "                     '$PATH_LIBALPM/scripts'."
+#fi
 
 echo "SUCCESS!"

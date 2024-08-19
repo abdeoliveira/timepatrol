@@ -1,6 +1,6 @@
 # timepatrol
 
-## BTRFS snapshot manager and rollback tool 
+## BTRFS snapshots manager and rollback tool 
 
 ![Alt text](/media/0.png?raw=true "Timepatrol in action!")
 
@@ -31,20 +31,34 @@ production environment!
 
 ## Installation
 
-1. Clone the repo: `git clone https://github.com/abdeoliveira/timepatrol`
-2. Enter the cloned folder: `cd timepatrol`
-3. Make the `install.sh` script executable and run it: `chmod +x install.sh && sudo ./install.sh`. 
+### Arch
 
-*Note:* If `pacman` is found, pacman hooks and 
-the auxiliary script `timepatrol-pacman` will be installed.
+From AUR (which I maintain myself) using your 
+preferred [helper](https://wiki.archlinux.org/title/AUR_helpers). 
+For example:
+
+```
+aura -A timepatrol-git
+``` 
+
+### Other Linux
+1. Clone: `git clone https://github.com/abdeoliveira/timepatrol`
+2. Enter: `cd timepatrol`
+3. Run: `sudo ./install.sh`. 
 
 ## Uninstall
 
-* Run the `uninstall.sh` script: `chmod +x uninstall.sh && sudo ./uninstall.sh`
+* Run: `sudo ./uninstall.sh`
 
 
 ## Configuration 
-Adjust the `/etc/timepatrol/config` file as per your system. Check the comments in file for directions.
+Copy the example configuration file as
+
+```
+cp /etc/timepatrol/config-example /etc/timepatrol/config
+```
+
+check the comments within for directions and adjust it as per your system. 
 
 **A note regarding `/etc/fstab`**: The default installation in some distributions 
 (Arch for instance) include the `subvolid` information in `fstab` for mounting 
@@ -163,7 +177,13 @@ section also.
 
 ## Bash completion
 
-Copy and paste the following line to your `~/.bashrc`:
+### Arch
+Install `bash-completion`.
+
+
+### Other Linux
+Install `bash-completion` and then copy and paste the 
+following line to your `~/.bashrc`:
 
 ```
 complete -W 'snapshot snapshot-keep toggle-keep delete rollback list list-verbose list-grep help' timepatrol
@@ -173,8 +193,9 @@ complete -W 'snapshot snapshot-keep toggle-keep delete rollback list list-verbos
 
 The simplest way is probably setting a cronjob as root. 
 
-First, install `cronie`, then enable its service (something like 
-`systemctl enable --now cronie.service`). Finnaly edit the crontab
+First, install `cronie`, then enable its service (e.g. something like 
+`systemctl enable --now cronie.service` for systemd users). 
+Finnaly edit the crontab
 with `sudo crontab -e`. If you for example want a hourly system snapshot, 
 use something like 
 
@@ -246,3 +267,9 @@ the following steps would fit in most cases:
 you can try to downgrade the kernel. If you are on Arch, try this second route 
 since `pacman` is very good on setting things up. 
 5. Exit chroot. Reboot.
+
+
+## TODO
+
+* `timepatrol check` in order to check the integrity of the configuration file.
+* Include an in-house script for timely, automatic backups. Currently the user is expected to configure a `crontab` or something.
