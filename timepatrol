@@ -62,10 +62,12 @@ end
 
 
 def snapid
-  ids = `btrfs subvolume list / | grep #{SNAPSHOTS_VOLUME}/`
   id_list=[]
-  ids.split("\n").each do |i|
-    id_list<<i.split('/')[1].to_i
+  subvolumes = `btrfs subvolume list /`
+  subvolumes.split("\n").each do |line|
+    if line.include? SNAPSHOTS_VOLUME and line.include? 'data'
+      id_list << (line.split SNAPSHOTS_VOLUME+'/').last.delete('/data')
+    end
   end
   return id_list.sort
 end
@@ -417,14 +419,14 @@ def help
   puts line = ('-'.*space).bold
   puts 'USAGE:'.yellow.bold + ' timepatrol [COMMAND]'.bold
   puts line
-  puts 'COMMANDS:'.yellow.bold + " snapshot 'COMMENT'"
-  puts "          snapshot-keep 'COMMENT'"
+  puts 'COMMANDS:'.yellow.bold + " snapshot 'OPTIONAL COMMENT'"
+  puts "          snapshot-keep 'OPTIONAL COMMENT'"
   puts "          toggle-keep"
   puts '          delete'
   puts '          rollback'
   puts '          list'
   puts '          list-verbose'
-  puts '          list-grep'
+  puts "          list-grep 'STRING'"
 end
 
 
