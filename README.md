@@ -23,8 +23,7 @@ very handy in the day-to-day use.
 
 ## Disclaimer
 
-This is an early, experimental project. DO NOT use in a
-production environment!
+This is an early, experimental project. Use at your own discretion.
 
 ## Dependency
 * `ruby`
@@ -38,7 +37,7 @@ preferred [helper](https://wiki.archlinux.org/title/AUR_helpers).
 For example:
 
 ```
-aura -A timepatrol-git
+paru -S timepatrol-git
 ``` 
 
 ### Other Linux
@@ -58,7 +57,8 @@ Copy the example configuration file as
 cp /etc/timepatrol/config-example /etc/timepatrol/config
 ```
 
-Then, check the comments in `config` for directions and adjust it as per your system. 
+Then, check the comments in `config` file 
+for directions and adjust it as per your system. 
 
 **A note regarding `/etc/fstab`**: The default installation in some distributions 
 (Arch for instance) include the `subvolid` information in `fstab` for mounting 
@@ -110,36 +110,6 @@ For example: `sudo timepatrol delete 1,10,20-23` will delete snapshots whose
 the following substring selectors: `date=`, `time=`, `kernel=`, and `comment=`.
 See the example of usage below:
 
-First, `list`:
-```
-oliveira@arch:~$ sudo timepatrol list 
-====================================================================================
-                             :: TIMEPATROL SNAPSHOTS ::
-====================================================================================
-   ID   DATE        TIME      KERNEL         COMMENT
-   [1]  2024.06.11  09:57:31  6.9.3-arch1-1  System OK 
-   [4]  2024.06.11  10:01:05  6.9.3-arch1-1  pre: rollback to [2024.06.11 09:59:18] 
-   [5]  2024.06.11  10:07:15  6.9.3-arch1-1  pre: Running 'pacman --upgrade 
-                                             --noconfirm -- /home/oliveira/
-                                             .cache/paru/clone/qtgrace/
-                                             qtgrace-0.2.7-1-x86_64.pkg.tar.zst' 
-   [7]  2024.06.11  10:09:17  6.9.3-arch1-1  pre: rollback to [2024.06.11 10:08:19] 
-   [8]  2024.06.11  10:15:36  6.9.3-arch1-1  pre: Running 'pacman -Rs qtgrace' 
-   [9]  2024.06.11  13:20:00  6.9.3-arch1-1  automatic 
- *[10]  2024.06.11  14:09:55  6.9.3-arch1-1  pre: starting full system upgrade. 
-                                             Upgraded Hyprland to 0.41.0 
-  [11]  2024.06.11  21:11:12  6.9.3-arch1-1  pre: Running 'pacman -S peek' 
-  [12]  2024.06.11  21:12:47  6.9.3-arch1-1  pre: Running 'pacman -S mplayer' 
-  [13]  2024.06.11  21:15:36  6.9.3-arch1-1  pre: Running 'pacman -Rs peek' 
-  [14]  2024.06.11  21:17:54  6.9.3-arch1-1  pre: Running 'pacman -S wf-recorder' 
-  [15]  2024.06.12  07:30:30  6.9.3-arch1-1  automatic 
-  [16]  2024.06.12  07:39:06  6.9.3-arch1-1  pre: starting full system upgrade 
-------------------------------------------------------------------------------------
-TOTAL: 13
-```
-
-Then, let's delete something:
-
 ```
 oliveira@arch:~$ sudo timepatrol delete time=10:
    [4] 2024.06.11 10:01:05 6.9.3-arch1-1 pre: rollback to [2024.06.11 09:59:18] 
@@ -182,11 +152,11 @@ Install `bash-completion`.
 
 
 ### Other Linux
-Install `bash-completion` and then copy and paste the 
-following line to your `~/.bashrc`:
+Install `bash-completion` and then copy and paste the contents of 
+`completions/timepatrol` to your `~/.bashrc`:
 
 ```
-complete -W 'snapshot snapshot-keep toggle-keep delete rollback list list-verbose list-grep help' timepatrol
+cat completions/timepatrol >> ~/.bashrc
 ```
 
 ## Periodic, automatic snapshots
@@ -272,4 +242,5 @@ since `pacman` is very good on setting things up.
 ## TODO
 
 * `timepatrol check` in order to check the integrity of the configuration file.
+* `timepatrol change-comment ID 'NEW COMMENT'` to easily change comments.
 * Include an in-house script for timely, automatic backups. Currently the user is expected to configure a `crontab` or something.
