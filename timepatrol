@@ -215,7 +215,7 @@ def rollback(array_selected)
     end
    
 
-    id = snapid.last + 1
+    id = snapid.last.to_i + 1
     date, time = readinfo(rollid)
 
     snapshot("PRE: rollback to [#{date} #{time}]",0,true) 
@@ -454,7 +454,7 @@ if option == 'snapshot' or option == 'snapshot-keep'
   if option == 'snapshot-keep' then keep = 1 end 
   snapshot(selid,keep,false)
   if snapid.length >= MAXIMUM_SNAPSHOTS.to_i then prune end
-  if snapid.last > 990 then repack end
+  if snapid.last.to_i > 990 then repack end
 
 elsif   option == 'list' or option == 'list-verbose'
   list(option)
