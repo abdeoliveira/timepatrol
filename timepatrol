@@ -207,8 +207,8 @@ def rollback(array_selected)
   if STDIN.gets.chomp == 'y' 
     `mkdir #{MOUNT_POINT} && mount -o subvolid=5 #{DEVICE} #{MOUNT_POINT}`
     
-    check_root = Dir.exists? MOUNT_POINT+'/'+ROOT_VOLUME
-    check_snap = Dir.exists? MOUNT_POINT+'/'+SNAPSHOTS_VOLUME
+    check_root = Dir.exist? MOUNT_POINT+'/'+ROOT_VOLUME
+    check_snap = Dir.exist? MOUNT_POINT+'/'+SNAPSHOTS_VOLUME
     unless check_root and check_snap
       puts format_message("Mounting stage went wrong. ABORTED.",1)
       abort
@@ -464,7 +464,7 @@ elsif  option == 'list-grep'
   grep_string(select("comment="+selid),selid)
 
 elsif option == 'rollback'
-  if Dir.exists? MOUNT_POINT 
+  if Dir.exist? MOUNT_POINT 
     puts format_message("The '#{MOUNT_POINT}' folder shouldn't exist. ABORTED.",1)
     abort 
   end
