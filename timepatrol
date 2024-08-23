@@ -207,9 +207,9 @@ def rollback(array_selected)
   if STDIN.gets.chomp == 'y' 
     `mkdir #{MOUNT_POINT} && mount -o subvolid=5 #{DEVICE} #{MOUNT_POINT}`
     
-    check_root = Dir.exist? MOUNT_POINT+'/'+ROOT_VOLUME
-    check_snap = Dir.exist? MOUNT_POINT+'/'+SNAPSHOTS_VOLUME
-    unless check_root and check_snap
+    root_dir_exists = Dir.exist? MOUNT_POINT+'/'+ROOT_VOLUME
+    snapshots_dir_exists = Dir.exist? MOUNT_POINT+'/'+SNAPSHOTS_VOLUME
+    unless root_dir_exists and snapshots_dir_exists
       puts format_message("Mounting stage went wrong. ABORTED.",1)
       abort
     end

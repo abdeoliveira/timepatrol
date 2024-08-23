@@ -98,8 +98,7 @@ given comment.
 * `snapshot-keep 'OPTIONAL COMMENT'`: same as above plus it adds a protection against 
 automatic deletion. Automatic deletion is set via the `MAXIMUM_SNAPSHOTS` 
 variable in the `/etc/timepatrol/config` file. 
-Protected snapshots are listed with `ID` in green color
-and have a `*` mark, and
+Protected snapshots have a `*` mark next to their IDs, and
 they do not count against the `MAXIMUM_SNAPSHOTS` variable.
 For example, if 2 snapshots are protected and `MAXIMUM_SNAPSHOTS = 20`,
 then the maximum number of snapshots will be 22. 
@@ -111,18 +110,19 @@ the following substring selectors: `date=`, `time=`, `kernel=`, and `comment=`.
 See the example of usage below:
 
 ```
-oliveira@arch:~$ sudo timepatrol delete time=10:
-   [4] 2024.06.11 10:01:05 6.9.3-arch1-1 pre: rollback to [2024.06.11 09:59:18] 
-   [5] 2024.06.11 10:07:15 6.9.3-arch1-1 pre: Running 'pacman --upgrade 
-                                             --noconfirm -- /home/oliveira/
-                                             .cache/paru/clone/qtgrace/
-                                             qtgrace-0.2.7-1-x86_64.pkg.tar.zst' 
-   [7] 2024.06.11 10:09:17 6.9.3-arch1-1 pre: rollback to [2024.06.11 10:08:19] 
-   [8] 2024.06.11 10:15:36 6.9.3-arch1-1 pre: Running 'pacman -Rs qtgrace' 
+oliveira@arch:~$ sudo timepatrol delete time=16:
+*[208]  2024.08.12  16:30:05  6.10.4-arch2-1  Niri OK 
+ [258]  2024.08.20  16:07:01  6.10.5-arch1-1  PRE: install libxp (1.0.4-3) 
+ [259]  2024.08.20  16:07:56  6.10.5-arch1-1  PRE: remove libxp (1.0.4-3) 
+ [260]  2024.08.20  16:26:31  6.10.5-arch1-1  PRE: install libxp (1.0.4-3), install 
+                                              openmotif (2.3.8-3), install t1lib 
+                                              (5.1.2-8) 
+ [264]  2024.08.21  10:16:52  6.10.6-arch1-1  PRE: upgrade timepatrol-git 
+                                              (r149.7e4bff6-1 -> r151.3f4f304-1) 
 :: Confirm deletion of the selected snapshot(s) above? [y/N]
 ```
 
-Note that all snapshots containing the user-given substring `10:` in the `time` field 
+Note that all snapshots containing the user-given substring `16:` in the `time` field 
 were selected for deletion. I recommend you play with the other selectors. In 
 any case, the user will always be prompted to confirm the deletion 
 with the `No` answer being the defaut.
