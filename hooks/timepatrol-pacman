@@ -1,72 +1,49 @@
 #!/usr/bin/ruby
-MAGIC_STRING = "@PACMAN-PRE-HOOK"
+# frozen_string_literal: true
 
+@magic_string = '@PACMAN-PRE-HOOK'
 
-
-def clean_pre_hook_lockfile(path)
-  pacman_lock_file = "#{path}/data/var/lib/pacman/db.lck"
-  if File.exist?(pacman_lock_file) then puts `rm #{pacman_lock_file}` end
-end
-
-
-
-def change_string(actions,path)
+def change_string(actions, path)
   info = File.read("#{path}/info")
-  info.sub!(MAGIC_STRING,"PRE: #{actions}")
-  File.write("#{path}/info",info,mode:'w')
+  info.sub!(@magic_string, "PRE: #{actions}")
+  File.write("#{path}/info", info, mode: 'w')
 end
 
-
-
-
-if ARGV[0] == 'pre'
-  `/usr/bin/timepatrol snapshot #{MAGIC_STRING}`
-end
-
-
+`/usr/bin/timepatrol snapshot #{@magic_string}` if ARGV[0] == 'pre'
 
 if ARGV[0] == 'post'
+
   path = File.read('/tmp/timepatrol_last_snapshot').strip
-  clean_pre_hook_lockfile(path)
-
-
+  pacman_lock_file = "#{path}/data/var/lib/pacman/db.lck"
+  `rm #{pacman_lock_file}` if File.exist? "#{path}/data/var/lib/pacman/db.lck"
 
   first_stage = []
   second_stage = []
   actions = ''
-  
 
+  (File.readlines '/var/log/pacman.log').reverse.each do |line|
+    break if line.include? 'timepatrol-pre.hook'
 
-  pacman_log = (File.readlines '/var/log/pacman.log').reverse
-  pacman_log.each do |line|
-    if line.include? 'timepatrol-pre.hook' then break end
-    first_stage<<line
+    first_stage << line
   end
-  
-
 
   first_stage.reverse.each do |line|
-    if line.include? 'transaction completed' then break end
-    unless line.include? 'transaction started' then second_stage<<line end
+    break if line.include? 'transaction completed'
+
+    second_stage << line unless line.include? 'transaction started'
   end
-  
 
-
-  second_stage.each.with_index do |line,index|
+  second_stage.each.with_index do |line, index|
     unless line.include?('[ALPM-SCRIPTLET]')
       actions += line.split('[ALPM]').last.strip
-      if index + 1 < second_stage.length then actions += ', ' end
+      actions += ', ' if index + 1 < second_stage.length
     end
   end
- 
 
+  actions.gsub!('upgraded', 'upgrade')
+  actions.gsub!('installed', 'install')
+  actions.gsub!('removed', 'remove')
+  actions.gsub!('downgraded', 'downgrade')
 
-  actions.gsub!('upgraded','upgrade')
-  actions.gsub!('installed','install')
-  actions.gsub!('removed','remove')
-  actions.gsub!('downgraded','downgrade')
-
-
-
-  change_string(actions,path)
+  change_string(actions, path)
 end

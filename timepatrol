@@ -1,390 +1,256 @@
 #!/usr/bin/ruby
+# frozen_string_literal: true
 
 if File.file? '/etc/timepatrol/config'
   load '/etc/timepatrol/config'
 else
-  puts "It seems this is your first run." 
+  puts 'It seems this is your first run.'
   puts "You must 'sudo cp /etc/timepatrol/config-example /etc/timepatrol/config',"
   puts "then edit 'config' according to your system."
   puts 'ABORTED.'
   abort
 end
 
+# CHANGE (OR NOT) STRING COLORS
 class String
-
-  def colorize(code1,code2)
+  def colorize(code1, code2)
     if DISABLE_COLORS != 'true'
-      "\e[#{code1}m#{self}\e[#{code2}m"  
+      "\e[#{code1}m#{self}\e[#{code2}m"
     else
       self
     end
   end
 
-  def red;     colorize(31,0) end
-  def green;   colorize(32,0) end
-  def yellow;  colorize(33,0) end
-  def blue;    colorize(34,0) end
-  def magenta; colorize(35,0) end
-  def grey;    colorize(37,0) end
-  def bold;    colorize(1,22) end
-end
+  def red
+    colorize(31, 0)
+  end
 
-def is_root
-  unless ENV['USER'] == 'root'
-    puts format_message("You must run as root. ABORTED.",1)
-    abort
+  def green
+    colorize(32, 0)
+  end
+
+  def yellow
+    colorize(33, 0)
+  end
+
+  def blue
+    colorize(34, 0)
+  end
+
+  def magenta
+    colorize(35, 0)
+  end
+
+  def grey
+    colorize(37, 0)
+  end
+
+  def bold
+    colorize(1, 22)
   end
 end
 
+# FORMAT TIMEPATROL MESSAGES
+class String
+  def message(string)
+    string + self.bold
+  end
 
+  def abort
+    message(':: '.red.bold)
+  end
 
+  def inform
+    message(':: '.blue.bold)
+  end
 
-def max_snapshots_limit
-  if MAXIMUM_SNAPSHOTS.to_i > 999
-    puts format_message("'MAXIMUM_SNAPSHOTS' variable must be < 1000.",0)
-    abort
+  def decide
+    message(':: '.yellow.bold)
   end
 end
 
+def root?
+  true if ENV['USER'] == 'root'
+end
 
+def max_snapshots_limit?
+  true if MAXIMUM_SNAPSHOTS.to_i > 999
+end
 
 def now
- Time.new.strftime "%Y.%m.%d;%H:%M:%S"
+  Time.new.strftime '%Y.%m.%d;%H:%M:%S'
 end
 
-
-def if_letter_then_abort(selid)
-  if [*'a'..'z',*'A'..'Z'].include? selid
-    puts format_message("ABORTED.",1)
-    abort
-  end
+def letter?(selid)
+  true if [*'a'..'z', *'A'..'Z'].include? selid
 end
-
 
 def snapid
-  id_list=[]
+  id_list = []
   subvolumes = `btrfs subvolume list /`
   subvolumes.split("\n").each do |line|
-    if line.include? SNAPSHOTS_VOLUME and line.include? 'data'
-      id_list << (line.split SNAPSHOTS_VOLUME+'/').last.delete('/data')
+    if line.include?(SNAPSHOTS_VOLUME) && line.include?('data')
+      id_list << (line.split "#{SNAPSHOTS_VOLUME}/").last.delete('/data')
     end
   end
-  return id_list.sort
+  id_list.sort
 end
 
+def sanitize(string)
+  string ||= ''
+  string.gsub(';', '')
+end
 
-def snapshot(comm,keep,fake)
-  id = snapid.last.to_i + 1
-  path = SNAPSHOTS_FOLDER + '/' + id.to_s
-  kernel = `uname -r`.chomp
-  `mkdir #{path}`
-  comm ||= ''
-  unless fake 
-    puts `btrfs subvolume snapshot / #{path}/data` 
-    File.write('/tmp/timepatrol_last_snapshot',path,mode:'w')
+def snapshot(comm, keep, fake)
+  snapshot_path = "#{SNAPSHOTS_FOLDER}/#{snapid.last.to_i + 1}"
+  `mkdir #{snapshot_path}`
+  unless fake
+    puts `btrfs subvolume snapshot / #{snapshot_path}/data`
+    File.write('/tmp/timepatrol_last_snapshot', snapshot_path, mode: 'w')
   end
-  comm = comm.gsub(';','')
-  info = "#{now};#{comm};#{kernel};#{keep}"
-  File.write("#{path}/info",info,mode:'w')
+  info = "#{now};#{sanitize(comm)};#{`uname -r`.chomp};#{keep}"
+  File.write("#{snapshot_path}/info", info, mode: 'w')
 end
 
+def limit_string(string)
+  string[0..MAX_CHARACTERS_COMMENT.to_i]
+end
 
-
-def splitstr(string,shift)
-  max = MAX_CHARACTERS_COMMENT.to_i
+def split_string(string, shift)
   line = ''
   total = 0
-  string.gsub!('/','/ ')
   string.split(' ').each do |s|
-    scut = s[0..max]
-    total = total + scut.size
-    if total < max
-      line = line + scut + ' '
+    total += limit_string(s).size
+    if total < MAX_CHARACTERS_COMMENT.to_i
+      line += "#{limit_string(s)} "
     else
-      total = scut.size
-      line = line + "\n" + ' '*shift + scut + ' ' 
+      total = limit_string(s).size
+      line += "\n#{' ' * shift}#{limit_string(s)} "
     end
   end
-  line.gsub!('/ ','/')
-  return line
+  line
 end
-
-
 
 def readinfo(id)
-  path = SNAPSHOTS_FOLDER + '/' + id.to_s
-  unless Dir.exist? path then puts format_message("There is\
- no snapshot ID [#{id}].",1); abort end
-  info = File.read(path + '/info').strip.split(';')
-  date  = info[0]
-  time  = info[1]
-  desc  = info[2]
-  kernel= info[3]
-  keep  = info[4]
-  comm  = splitstr(desc,46)
-  return date,time,comm,kernel,keep
+  path = "#{SNAPSHOTS_FOLDER}/#{id}"
+  abort unless Dir.exist? path
+  info = File.read("#{path}/info").strip.split(';')
+  date, time, comm, kernel, keep = info
+  comm  = split_string(comm, 46)
+  [date, time, comm, kernel, keep]
 end
 
-
-
-def colorline(string,index)
-  if index.odd? 
+def colorline(string, index)
+  if index.odd?
     string.grey
   else
     string
   end
 end
 
-
-
-def list(opt)
-
-
-  nline = 6+10+8+14+8+2 + MAX_CHARACTERS_COMMENT.to_i
-    title = ":: TIMEPATROL SNAPSHOTS ::"
-    tlhalf = title.length/2
-
-    
-    legend= ' '*3+"ID"\
-      +' '*3+"DATE"\
-      +' '*8+"TIME"\
-      +' '*6+"KERNEL"\
-      +' '*10+"COMMENT"
-    
-        
-    puts lineline = "="*nline
-    puts " "*(nline/2-tlhalf) + title.yellow.bold
-    puts lineline
-    puts legend.bold
-
-    
-    snapid.each.with_index do |id,index|
-      date, time, comm, kernel, keep = readinfo(id)
-      unless opt == 'list-verbose' then comm = comm[0..150].strip end
-      showinfo(id,date,time,comm,kernel,keep,index)
-    end
-
-
-    puts line = "-"*nline
-    puts "TOTAL: #{snapid.length}".bold
-    
-    
-    unless opt == 'list' or opt == 'list-verbose'  
-      if opt == 'rollback' then opt += ' to' end
-      opt = opt.magenta
-      puts format_message("Select a snapshot to #{opt}\
- or type any letter to ABORT:",0)
-    end
-
+def line_length
+  6 + 10 + 8 + 14 + 8 + 2 + MAX_CHARACTERS_COMMENT.to_i
 end
 
-
-def rollback(array_selected)
-  countdown = 10 # seconds before rebooting
-  rollid = array_selected.first 
-  kernel_from = `uname -r`.chomp 
-  kernel_to = readinfo(rollid)[3]
-
-
-  if array_selected.length != 1 then puts format_message("You\
- must choose a single ID. ABORTED.",1);abort end
-
-
-  if kernel_from != kernel_to
-    puts format_message("Running kernel (#{kernel_from}) is\
- different from snapshot [#{rollid}] kernel. ABORTED.",1)
-    abort
-  end
-  
-
-  puts format_message("Rolling back to the following snapshot:",0)
-  date, time, comm, kernel, keep = readinfo(rollid)
-  showinfo(rollid, date, time, comm, kernel, keep, 1)
-
-
-  puts format_message("Confirm? [y/N]",2)
-  
-  if STDIN.gets.chomp == 'y' 
-    `mkdir #{MOUNT_POINT} && mount -o subvolid=5 #{DEVICE} #{MOUNT_POINT}`
-    
-    root_dir_exists = Dir.exist? MOUNT_POINT+'/'+ROOT_VOLUME
-    snapshots_dir_exists = Dir.exist? MOUNT_POINT+'/'+SNAPSHOTS_VOLUME
-    unless root_dir_exists and snapshots_dir_exists
-      puts format_message("Mounting stage went wrong. ABORTED.",1)
-      abort
-    end
-   
-
-    id = snapid.last.to_i + 1
-    date, time = readinfo(rollid)
-
-    snapshot("PRE: rollback to [#{date} #{time}]",0,true) 
-    
-    `mv #{MOUNT_POINT}/#{ROOT_VOLUME} #{MOUNT_POINT}/#{SNAPSHOTS_VOLUME}/#{id}/data`
-    `btrfs subvolume snapshot #{MOUNT_POINT}/#{SNAPSHOTS_VOLUME}/#{rollid}/data #{MOUNT_POINT}/#{ROOT_VOLUME}`
-    list_subvol = `btrfs subvolume list /`.split("\n")
-    list_subvol.each do |subvol|
-      data = subvol.split(' ')
-      if data[8] == ROOT_VOLUME 
-        `btrfs subvolume set-default #{data[1]} /`
-        break
-      end
-    end
-
-   
-    `umount #{MOUNT_POINT} && rm -r #{MOUNT_POINT}`
-
-    puts format_message("Confirmed. Rebooting in...",0)
-      (countdown-1).times do |i| 
-        puts countdown-=1
-        sleep 1
-      end
-      puts 'BUCKLE UP!'
-      sleep 1
-    `reboot`
-  
-  else
-    puts format_message('ABORTED.',1)
-  end
+def lineline(type)
+  type * line_length
 end
 
+def title
+  string = ':: TIMEPATROL SNAPSHOTS ::'
+  ' ' * (line_length / 2 - string.size / 2) + string.yellow.bold
+end
 
+def legend
+  "#{' ' * 3}ID#{' ' * 3}DATE#{' ' * 8}TIME#{' ' * 6}KERNEL#{' ' * 10}COMMENT".bold
+end
 
-def showinfo(id,date,time,comm,kernel,keep,index)
+def format_information(id, info, index)
+  date, time, comm, kernel, keep = info
   id_space = 4 - id.to_s.size
   kernel_space = 16 - kernel.size
- 
-  id_string = colorline("[#{id}]",index)
-  date = colorline(date,index)
-  time = colorline(time,index)
-  comm = colorline(comm,index)
-  kernel = colorline(kernel,index)
-
-  if keep == '1' 
-    id_string = '*'.green.bold + id_string
+  id = "[#{id}]"
+  id = colorline(id, index)
+  date = colorline(date, index)
+  time = colorline(time, index)
+  comm = colorline(comm, index)
+  kernel = colorline(kernel, index)
+  if keep == '1'
+    id = '*'.green.bold + id
     id_space -= 1
   end
-  
-  puts ' '*id_space\
-    +id_string\
-    +' '*2+date\
-    +' '*2+time\
-    +' '*2+kernel\
-    +' '*kernel_space+comm
+  ' ' * id_space + id + ' ' * 2 + date + ' ' * 2 + time + ' ' * 2 + kernel + ' ' * kernel_space + comm
 end
 
-
-
-def select(selid)
+def array_selector(selid)
   special = false
+  special_selectors = ['date=', 'time=', 'comment=', 'kernel=', 'keep=']
+  special_selectors.each do |string|
+    special = true if selid.include? string
+  end
+  substring_selector(selid) if special
+  ids_selector(selid) unless special
+end
+
+def substring_selector(selid)
   array_selected = []
-  keyword = ['date=','time=','comment=','kernel=','keep=']
-  
-  keyword.map {|k| if selid.include? k then special=true; break end}
-  if special
-    5.times do |j|
-      snapid.each do |id|
-        string = readinfo(id)[j]
-        if string.include? selid.sub(keyword[j],'')
-          array_selected<<id
-        end
-      end
+  keyword = ['date=', 'time=', 'comment=', 'kernel=', 'keep=']
+  5.times do |j|
+    snapid.each do |id|
+      string = readinfo(id)[j]
+      array_selected << id if string.include? selid.sub(keyword[j], '')
     end
-  else
-    selid.split(',').each do |item|
-      if item.include? '-' 
-        selid_i = item.split('-').first.to_i
-        selid_f = item.split('-').last.to_i
-        if selid_i >= selid_f 
-          puts format_message("Bad range. ABORTED.",1)
-          abort 
-        end
-        snapid.each do |id|
-          if id >= selid_i and id <= selid_f
-            array_selected<<id
-          end
-        end
-      else
-        snapid.include? item
-        array_selected<<item
-      end
-    end 
   end
-  
-  if array_selected.empty?
-    puts format_message("No snapshot.",1)
-    abort
-  end
-
-  return array_selected
+  array_selected.uniq
 end
 
+def ids_selector(selid)
+  array_selected = []
+  selid.split(',').each do |item|
+    if item.include? '-'
+      range = item.split('-')
+      snapid.map { |id| array_selected << id if id.to_i >= range.min.to_i && id.to_i <= range.max.to_i }
+    else
+      array_selected << item
+    end
+  end
+  array_selected.uniq
+end
 
-
-def grep_string(array_selected,substring)
+def grep_string(array_selected, substring)
   array_selected.each do |id|
-     date, time, comm, kernel, keep = readinfo(id)
-     comm.gsub!(substring,substring.bold)
-     showinfo(id,date,time,comm,kernel,keep,1)
+    date, time, comm, kernel, keep = readinfo(id)
+    comm.gsub!(substring, substring.bold)
+    info = [date, time, comm, kernel, keep]
+    puts format_information(id, info, 1)
   end
 end
-
-
-
-def delete(array_selected)
-
-  array_selected.each.with_index do |id,index|
-    date,time,comm,kernel,keep = readinfo(id)
-    showinfo(id,date,time,comm,kernel,keep,index)
-  end
-
-
-  puts format_message("Confirm deletion of the selected snapshot(s) above? [y/N]",2)
-  ans = STDIN.gets.chomp
-
-
-  if ans == 'y' 
-    puts format_message("Confirmed.",0)
-    array_selected.each do |id|
-      code1 = `btrfs subvolume delete #{SNAPSHOTS_FOLDER}/#{id}/data; echo $?`.to_i
-      code2 = `rm -r #{SNAPSHOTS_FOLDER}/#{id}; echo $?`.to_i 
-      if code1.abs+code2.abs > 0 then puts "FAILED deleting snapshot [#{id}]." end
-    end
-  else 
-    puts format_message('ABORTED.',1)
-  end
-
-end
-
-
-
 
 def repack
-  puts "Repacking snapshots..."
-  path = SNAPSHOTS_FOLDER+'/'
-  snapid.each.with_index do |v,j|
-    from = path+v.to_s
-    to = path+(j+1).to_s
+  puts 'Repacking snapshots...'
+  path = "#{SNAPSHOTS_FOLDER}/"
+  snapid.each.with_index do |v, j|
+    from = path + v.to_s
+    to = path + (j + 1).to_s
     if from != to
       `mv #{from} #{to}`
-      puts "#{v} --> #{j+1}"
+      puts "#{v} --> #{j + 1}"
     end
   end
 end
-
 
 def prune
   count = 0
   keep_count = 0
-  snapid.map{ |id| if readinfo(id)[4]=='1' then keep_count+=1 end }
+  snapid.map { |id| keep_count += 1 if readinfo(id)[4] == '1' }
   maxdel = snapid.length - (MAXIMUM_SNAPSHOTS.to_i + keep_count)
-  
   snapid.each do |id|
-    if count >= maxdel then break end
-    unless readinfo(id)[4]=='1'
+    break if count >= maxdel
+
+    unless readinfo(id)[4] == '1'
       code1 = `btrfs subvolume delete #{SNAPSHOTS_FOLDER}/#{id}/data; echo $?`.to_i
-      code2 = `rm -r #{SNAPSHOTS_FOLDER}/#{id}; echo $?`.to_i 
-      if code1.abs + code2.abs > 0 
+      code2 = `rm -r #{SNAPSHOTS_FOLDER}/#{id}; echo $?`.to_i
+      if (code1.abs + code2.abs).positive?
         puts "FAILED pruning snapshot [#{id}]."
       else
         puts "pruning snapshot [#{id}]."
@@ -394,94 +260,176 @@ def prune
   end
 end
 
-
-def mark(array_selected)
-  array_selected.each do |id|
-    file = SNAPSHOTS_FOLDER+'/'+id.to_s+'/info' 
+def mark(array)
+  array.each do |id|
+    file = "#{SNAPSHOTS_FOLDER}/#{id}/info"
     date, time, comm, kernel = readinfo(id)
-    keep = (-readinfo(id)[4].to_i + 2)/2
-    info = date+';'+time+';'+comm+';'+kernel+';'+keep.to_s
-    File.write(file,info,mode:'w')
+    keep = (-readinfo(id)[4].to_i + 2) / 2
+    info = "#{date};#{time};#{comm};#{kernel};#{keep}"
+    File.write(file, info, mode: 'w')
   end
 end
 
+#=============================================
 
-def format_message(message,mode)
-  if mode == 0 then sign = ":: ".blue.bold end #Informative
-  if mode == 1 then sign = ":: ".red.bold end #Aborted
-  if mode == 2 then sign = ":: ".yellow.bold end #User decision
-  return sign+message.bold
+unless root?
+  puts 'Please run as root.'.abort
+  abort
 end
 
+if max_snapshots_limit?
+  puts "'MAXIMUM_SNAPSHOTS' must be < 1000.".abort
+  abort
+end
 
-def help
+option = ARGV[0]
+selid = ARGV[1]
+
+option ||= 'help'
+selid ||= ''
+
+case option
+when 'snapshot', 'snapshot-keep'
+  keep = 0
+  keep = 1 if option == 'snapshot-keep'
+  snapshot(selid, keep, false)
+  prune if snapid.length >= MAXIMUM_SNAPSHOTS.to_i
+  repack if snapid.last.to_i > 990
+
+when 'list', 'list-verbose'
+  puts lineline('=')
+  puts title
+  puts lineline('=')
+  puts legend
+  snapid.each.with_index do |id, index|
+    date, time, comm, kernel, keep = readinfo(id)
+    comm = comm[0..150] unless option == 'list-verbose'
+    info = [date, time, comm, kernel, keep]
+    puts format_information(id, info, index)
+  end
+  puts lineline('-')
+  puts "TOTAL: #{snapid.length}".bold
+
+when 'list-grep'
+  selid ||= abort
+  grep_string(substring_selector("comment=#{selid}"), selid)
+
+when 'rollback'
+  countdown = 10 # seconds before rebooting
+
+  if Dir.exist? MOUNT_POINT
+    puts "The '#{MOUNT_POINT}' folder shouldn't exist. ABORTED.".abort
+    abort
+  end
+  array = array_selector(selid)
+
+  if array.length > 1
+    puts 'You must choose a single ID. ABORTED.'.abort
+    abort
+  end
+
+  abort if array.empty?
+
+  rollid = array.first
+  kernel_from = `uname -r`.chomp
+  kernel_to = readinfo(rollid)[3]
+
+  if kernel_from != kernel_to
+    puts "Running kernel (#{kernel_from}) is different from [#{rollid}]'s kernel. ABORTED.".abort
+    abort
+  end
+
+  puts 'Rolling back to the following snapshot:'.inform
+  info = readinfo(rollid)
+  puts format_information(rollid, info, 1)
+
+  puts 'Confirm? [y/N]'.decide
+  unless $stdin.gets.chomp == 'y'
+    puts 'ABORTED.'.abort
+    abort
+  end
+
+  `mkdir #{MOUNT_POINT} && mount -o subvolid=5 #{DEVICE} #{MOUNT_POINT}`
+  root_dir_exists = Dir.exist? "#{MOUNT_POINT}/#{ROOT_VOLUME}"
+  snapshots_dir_exists = Dir.exist? "#{MOUNT_POINT}/#{SNAPSHOTS_VOLUME}"
+  unless root_dir_exists && snapshots_dir_exists
+    puts 'Mounting stage went wrong. ABORTED.'.abort
+    abort
+  end
+
+  id = snapid.last.to_i + 1
+  date, time = readinfo(rollid)
+  snapshot("PRE: rollback to [#{date} #{time}]", 0, true)
+
+  `mv #{MOUNT_POINT}/#{ROOT_VOLUME} #{MOUNT_POINT}/#{SNAPSHOTS_VOLUME}/#{id}/data`
+  `btrfs subvolume snapshot #{MOUNT_POINT}/#{SNAPSHOTS_VOLUME}/#{rollid}/data #{MOUNT_POINT}/#{ROOT_VOLUME}`
+  list_subvol = `btrfs subvolume list /`.split("\n")
+  list_subvol.each do |subvol|
+    data = subvol.split(' ')
+    if data[8] == ROOT_VOLUME
+      `btrfs subvolume set-default #{data[1]} /`
+      break
+    end
+  end
+  `umount #{MOUNT_POINT} && rm -r #{MOUNT_POINT}`
+
+  puts 'Confirmed. Rebooting in...'.inform
+  (countdown - 1).times do
+    puts countdown -= 1
+    sleep 1
+  end
+  puts 'BUCKLE UP!'
+  sleep 2
+  `reboot`
+
+when 'delete'
+  array = array_selector(selid)
+  abort if array.empty?
+
+  array.each.with_index do |iid, index|
+    info_array = readinfo(iid)
+    puts format_information(iid, info_array, index)
+  end
+
+  puts 'Confirm deletion of the selected snapshot(s) above? [y/N]'.decide
+  unless $stdin.gets.chomp == 'y'
+    puts 'ABORTED.'.abort
+    abort
+  end
+
+  puts 'Confirmed.'.inform
+  array.each do |iid|
+    code1 = `btrfs subvolume delete #{SNAPSHOTS_FOLDER}/#{iid}/data; echo $?`.to_i
+    code2 = `rm -r #{SNAPSHOTS_FOLDER}/#{iid}; echo $?`.to_i
+    puts "FAILED deleting snapshot [#{iid}]." if (code1.abs + code2.abs).positive?
+  end
+
+when 'toggle-keep'
+  array = array_selector(selid)
+  abort if array.empty?
+
+  array.each do |iid|
+    file = "#{SNAPSHOTS_FOLDER}/#{iid}/info"
+    date, time, comm, kernel = readinfo(iid)
+    keep = (-readinfo(iid)[4].to_i + 2) / 2
+    info = "#{date};#{time};#{comm};#{kernel};#{keep}"
+    File.write(file, info, mode: 'w')
+  end
+
+when 'help'
   space = 30
   puts line = ('-'.*space).bold
   puts 'USAGE:'.yellow.bold + ' timepatrol [COMMAND]'.bold
   puts line
   puts 'COMMANDS:'.yellow.bold + " snapshot 'OPTIONAL COMMENT'"
   puts "          snapshot-keep 'OPTIONAL COMMENT'"
-  puts "          toggle-keep"
+  puts '          toggle-keep'
   puts '          delete'
   puts '          rollback'
   puts '          list'
   puts '          list-verbose'
   puts "          list-grep 'STRING'"
-end
-
-
-#=======================================
-
-is_root
-max_snapshots_limit
-
-option = ARGV[0]
-selid = ARGV[1]
-option ||= 'help' 
-
-
-special_options = ['delete','rollback','toggle-keep']
-if selid.nil? and special_options.include? option
-  list(option)
-  selid = STDIN.gets.chomp
-  if_letter_then_abort(selid)
-end
-
-
-
-if option == 'snapshot' or option == 'snapshot-keep'
-  keep = 0
-  if option == 'snapshot-keep' then keep = 1 end 
-  snapshot(selid,keep,false)
-  if snapid.length >= MAXIMUM_SNAPSHOTS.to_i then prune end
-  if snapid.last.to_i > 990 then repack end
-
-elsif   option == 'list' or option == 'list-verbose'
-  list(option)
-
-elsif  option == 'list-grep'
-  selid ||= abort
-  grep_string(select("comment="+selid),selid)
-
-elsif option == 'rollback'
-  if Dir.exist? MOUNT_POINT 
-    puts format_message("The '#{MOUNT_POINT}' folder shouldn't exist. ABORTED.",1)
-    abort 
-  end
-  rollback(select(selid))
-
-elsif option == 'delete'
-  delete(select(selid))
-
-elsif option == 'toggle-keep'
-  mark(select(selid))
-
-elsif option == 'help' 
-  help
-
 else
-  help
-  puts format_message("There is no '#{option}' option. ABORTED",1)
-
+  puts "There is no '#{option}' option.".abort
+  puts "Type 'sudo timepatrol help' for help.".abort
 end
-

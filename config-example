@@ -23,6 +23,5 @@ MAX_CHARACTERS_COMMENT = '35'
 # It will be created on demand and deleted afterwards. You can pick any name
 MOUNT_POINT = '/mnt/timepatroltmp'
 
-# Set it to 'true' if you don't want colors.
+# Set 'true' if you don't want colors.
 DISABLE_COLORS = ''
-
