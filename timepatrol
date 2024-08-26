@@ -52,20 +52,16 @@ end
 
 # FORMAT TIMEPATROL MESSAGES
 class String
-  def message(string)
-    string + self.bold
-  end
-
   def abort
-    message(':: '.red.bold)
+    ':: '.red.bold + self.bold 
   end
 
   def inform
-    message(':: '.blue.bold)
+    ':: '.blue.bold + self.bold
   end
 
   def decide
-    message(':: '.yellow.bold)
+    ':: '.yellow.bold + self.bold
   end
 end
 
@@ -131,9 +127,14 @@ def split_string(string, shift)
   line
 end
 
+def no_snapshot
+  puts 'No snapshot.'.abort
+  abort
+end
+
 def readinfo(id)
   path = "#{SNAPSHOTS_FOLDER}/#{id}"
-  abort unless Dir.exist? path
+  no_snapshot unless Dir.exist? path
   info = File.read("#{path}/info").strip.split(';')
   date, time, comm, kernel, keep = info
   comm  = split_string(comm, 46)
@@ -149,7 +150,7 @@ def colorline(string, index)
 end
 
 def line_length
-  6 + 10 + 8 + 14 + 8 + 2 + MAX_CHARACTERS_COMMENT.to_i
+  legend.length + MAX_CHARACTERS_COMMENT.to_i - 15
 end
 
 def lineline(type)
@@ -162,7 +163,7 @@ def title
 end
 
 def legend
-  "#{' ' * 3}ID#{' ' * 3}DATE#{' ' * 8}TIME#{' ' * 6}KERNEL#{' ' * 10}COMMENT".bold
+  "#{' '*3}ID#{' '*3}DATE#{' '*8}TIME#{' '*6}KERNEL#{' '*10}COMMENT".bold
 end
 
 def format_information(id, info, index)
@@ -179,7 +180,7 @@ def format_information(id, info, index)
     id = '*'.green.bold + id
     id_space -= 1
   end
-  ' ' * id_space + id + ' ' * 2 + date + ' ' * 2 + time + ' ' * 2 + kernel + ' ' * kernel_space + comm
+  ' '*id_space+id+' '*2+date+' '*2+time+' '*2+kernel+' '*kernel_space+comm
 end
 
 def array_selector(selid)
@@ -286,9 +287,11 @@ end
 
 option = ARGV[0]
 selid = ARGV[1]
+new_comment = ARGV[2]
 
 option ||= 'help'
 selid ||= ''
+new_comment ||= ''
 
 case option
 when 'snapshot', 'snapshot-keep'
@@ -316,6 +319,21 @@ when 'list-grep'
   selid ||= abort
   grep_string(substring_selector("comment=#{selid}"), selid)
 
+when 'change-comment'
+  array = array_selector(selid)
+  if array.length > 1
+    puts 'You must choose a single ID. ABORTED.'.abort
+    abort
+  end
+  
+  no_snapshot if array.empty?
+  
+  id = array.first
+  file = "#{SNAPSHOTS_FOLDER}/#{id}/info"
+  date, time, comm, kernel, keep = readinfo(id)
+  info = "#{date};#{time};#{new_comment};#{kernel};#{keep}"
+  File.write(file, info, mode: 'w')
+
 when 'rollback'
   countdown = 10 # seconds before rebooting
 
@@ -323,14 +341,14 @@ when 'rollback'
     puts "The '#{MOUNT_POINT}' folder shouldn't exist. ABORTED.".abort
     abort
   end
-  array = array_selector(selid)
 
+  array = array_selector(selid)
   if array.length > 1
     puts 'You must choose a single ID. ABORTED.'.abort
     abort
   end
 
-  abort if array.empty?
+  no_snapshot if array.empty?
 
   rollid = array.first
   kernel_from = `uname -r`.chomp
@@ -386,11 +404,11 @@ when 'rollback'
 
 when 'delete'
   array = array_selector(selid)
-  abort if array.empty?
+  no_snapshot if array.empty?
 
   array.each.with_index do |iid, index|
     info_array = readinfo(iid)
-    puts format_information(iid, info_array, index)
+    puts format_information(iid, info_array, 1)
   end
 
   puts 'Confirm deletion of the selected snapshot(s) above? [y/N]'.decide
@@ -408,7 +426,7 @@ when 'delete'
 
 when 'toggle-keep'
   array = array_selector(selid)
-  abort if array.empty?
+  no_snapshot if array.empty?
 
   array.each do |iid|
     file = "#{SNAPSHOTS_FOLDER}/#{iid}/info"

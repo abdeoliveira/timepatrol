@@ -103,6 +103,9 @@ they do not count against the `MAXIMUM_SNAPSHOTS` variable.
 For example, if 2 snapshots are protected and `MAXIMUM_SNAPSHOTS = 20`,
 then the maximum number of snapshots will be 22. 
 
+* `change-comment ID 'NEW COMMENT'`: replaces current COMMENT of snapshot ID by
+'NEW COMMENT'.
+
 * `delete`: deletes a snapshot. It accepts individual `ID` numbers and ranges. 
 For example: `sudo timepatrol delete 1,10,20-23` will delete snapshots whose 
 `ID`s are 1, 10, 20, 21, 22, and 23. The `delete` command also accepts 
@@ -176,48 +179,6 @@ use something like
 
 and keep an eye on the file `/tmp/timepatrol.log` for eventual errors (hope not!).
 
-
-## Changing a snapshot comment
-
-Snapshots are kept in the `SNAPSHOTS_FOLDER` provided by the user in 
-the `/etc/timepatrol/config` file. 
-
-Each snapshot is composed by a folder, having the general structure as
-
-```
-SNAPSHOT_FOLDER/ID/data
-```
-
-and an information file, which is
-
-```
-SNAPSHOT_FOLDER/ID/info
-```
-
-The information file is a text file, 
-structured with positional strings separated by `;`, as 
-follows
-
-```
-date;time;comment;kernel;integer_variable
-```
-
-* `date` has format `yyyy.mm.dd`
-
-* `time` has format `hh:mm:ss`
-
-* `comment` is either empty or a string. It accepts spaces and most characters, but `;`.
-
-* `kernel` is exaclty as given by `uname -r`
-
-* `integer_variable` is `0` or `1`. The former meaning the snapshot is unprotected 
-against automatic prunning, while the latter is the opposite. 
-
-
-Now if you want to edit any information regarding any snapshot (most probably the
-comment), it is just a matter of `vim` or `nano` its correspondent `info` file.
-
-
 ## Troubleshooting
 
 ### Unbootable system after rollback
@@ -242,5 +203,4 @@ since `pacman` is very good on setting things up.
 ## TODO
 
 * `timepatrol check` in order to check the integrity of the configuration file.
-* `timepatrol change-comment ID 'NEW COMMENT'` to easily change comments.
 * Include an in-house script for timely, automatic backups. Currently the user is expected to configure a `crontab` or something.
