@@ -303,7 +303,7 @@ when 'list', 'list-verbose'
   puts legend
   snapid.each.with_index do |id, index|
     date, time, comm, kernel, keep = readinfo(id)
-    comm = comm[0..150] unless option == 'list-verbose'
+    comm = comm[0..150].strip unless option == 'list-verbose'
     info = [date, time, comm, kernel, keep]
     puts format_information(id, info, index)
   end
