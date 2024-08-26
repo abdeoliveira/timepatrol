@@ -273,6 +273,11 @@ def mark(array)
   end
 end
 
+def write_to_file(id, string)
+  file = "#{SNAPSHOTS_FOLDER}/#{id}/info"
+  File.write(file, string, mode: 'w')
+end
+
 #=============================================
 
 unless root?
@@ -329,10 +334,9 @@ when 'change-comment'
   no_snapshot if array.empty?
   
   id = array.first
-  file = "#{SNAPSHOTS_FOLDER}/#{id}/info"
   date, time, comm, kernel, keep = readinfo(id)
   info = "#{date};#{time};#{new_comment};#{kernel};#{keep}"
-  File.write(file, info, mode: 'w')
+  write_to_file(id, info)
 
 when 'rollback'
   countdown = 10 # seconds before rebooting
@@ -429,11 +433,10 @@ when 'toggle-keep'
   no_snapshot if array.empty?
 
   array.each do |iid|
-    file = "#{SNAPSHOTS_FOLDER}/#{iid}/info"
     date, time, comm, kernel = readinfo(iid)
     keep = (-readinfo(iid)[4].to_i + 2) / 2
     info = "#{date};#{time};#{comm};#{kernel};#{keep}"
-    File.write(file, info, mode: 'w')
+    write_to_file(iid, info)
   end
 
 when 'help'
