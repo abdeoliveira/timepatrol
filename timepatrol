@@ -263,16 +263,6 @@ def prune
   end
 end
 
-def mark(array)
-  array.each do |id|
-    file = "#{SNAPSHOTS_FOLDER}/#{id}/info"
-    date, time, comm, kernel = readinfo(id)
-    keep = (-readinfo(id)[4].to_i + 2) / 2
-    info = "#{date};#{time};#{comm};#{kernel};#{keep}"
-    File.write(file, info, mode: 'w')
-  end
-end
-
 def write_to_file(id, string)
   file = "#{SNAPSHOTS_FOLDER}/#{id}/info"
   File.write(file, string, mode: 'w')
