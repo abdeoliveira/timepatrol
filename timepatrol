@@ -415,7 +415,7 @@ when 'delete'
   array.each do |iid|
     code1 = `btrfs subvolume delete #{SNAPSHOTS_FOLDER}/#{iid}/data; echo $?`.to_i
     code2 = `rm -r #{SNAPSHOTS_FOLDER}/#{iid}; echo $?`.to_i
-    puts "FAILED deleting snapshot [#{iid}]." if (code1.abs + code2.abs).positive?
+    puts "FAILED deleting snapshot [#{iid}].".abort if (code1.abs + code2.abs).positive?
   end
 
 when 'toggle-keep'
@@ -445,5 +445,5 @@ when 'help'
 
 else
   puts "There is no '#{option}' option.".abort
-  puts "Type 'sudo timepatrol help' for help.".abort
+  puts "Type 'sudo timepatrol help' for a list of commands.".abort
 end
