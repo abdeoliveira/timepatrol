@@ -209,7 +209,9 @@ def ids_selector(selid)
   selid.split(',').each do |item|
     if item.include? '-'
       range = item.split('-')
-      snapid.map { |id| array_selected << id if id.to_i >= range.min.to_i && id.to_i <= range.max.to_i }
+      snapid.each do |id| 
+        array_selected << id if id.to_i >= range.min.to_i && id.to_i <= range.max.to_i
+      end
     else
       array_selected << item
     end
@@ -429,6 +431,7 @@ when 'help'
   puts '          list'
   puts '          list-verbose'
   puts "          list-grep 'STRING'"
+
 else
   puts "There is no '#{option}' option.".abort
   puts "Type 'sudo timepatrol help' for help.".abort
