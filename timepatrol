@@ -400,7 +400,7 @@ when 'delete'
   array = array_selector(selid)
   no_snapshot if array.empty?
 
-  array.each.with_index do |iid, index|
+  array.each do |iid|
     info_array = readinfo(iid)
     puts format_information(iid, info_array, 1)
   end
