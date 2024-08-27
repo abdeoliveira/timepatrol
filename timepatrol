@@ -430,18 +430,23 @@ when 'toggle-keep'
   end
 
 when 'help'
-  space = 30
-  puts line = ('-'.*space).bold
+  space = 40
+  line = ('-'.*space).bold
+  puts line
   puts 'USAGE:'.yellow.bold + ' timepatrol [COMMAND]'.bold
   puts line
   puts 'COMMANDS:'.yellow.bold + " snapshot 'OPTIONAL COMMENT'"
   puts "          snapshot-keep 'OPTIONAL COMMENT'"
-  puts '          toggle-keep'
-  puts '          delete'
-  puts '          rollback'
+  puts "          change-comment ID 'NEW COMMENT'"
+  puts '          toggle-keep ID*'
+  puts '          delete ID*'
+  puts '          rollback ID'
   puts '          list'
   puts '          list-verbose'
   puts "          list-grep 'STRING'"
+  puts line
+  puts '* Accept IDs separated by commas and/or ranges.'
+  puts '  For example: ID1,ID2,ID3-ID4.'
 
 else
   puts "There is no '#{option}' option.".abort
