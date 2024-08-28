@@ -446,7 +446,7 @@ when 'help'
   puts "          list-grep 'STRING'"
   puts line
   puts '* Accept IDs separated by commas and/or ranges.'
-  puts '  For example: ID1,ID2,ID3-ID4.'
+  puts "  For example: '... delete 90,105,200-210'."
 
 else
   puts "There is no '#{option}' option.".abort
