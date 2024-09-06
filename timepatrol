@@ -189,8 +189,8 @@ def array_selector(selid)
   special_selectors.each do |string|
     special = true if selid.include? string
   end
-  substring_selector(selid) if special
-  ids_selector(selid) unless special
+  return substring_selector(selid) if special
+  return ids_selector(selid) unless special
 end
 
 def substring_selector(selid)
