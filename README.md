@@ -32,13 +32,7 @@ This is an early, experimental project. Use at your own discretion.
 
 ### Arch
 
-From AUR (which I maintain myself) using your 
-preferred [helper](https://wiki.archlinux.org/title/AUR_helpers). 
-For example:
-
-```
-paru -S timepatrol-git
-``` 
+From [AUR](https://aur.archlinux.org/packages/timepatrol-git), which I maintain myself.
 
 ### Other Linux
 1. Clone: `git clone https://github.com/abdeoliveira/timepatrol`
@@ -47,8 +41,13 @@ paru -S timepatrol-git
 
 ## Uninstall
 
-* Run: `sudo rm -r /usr/bin/timepatrol /etc/timepatrol`
+### Arch
 
+`sudo pacman -Rs timepatrol-git`
+
+### Other Linux
+
+* Run: `sudo rm -r /usr/bin/timepatrol /etc/timepatrol`
 
 ## Configuration 
 Copy the example configuration file as
