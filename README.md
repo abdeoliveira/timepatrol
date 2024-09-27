@@ -35,9 +35,9 @@ This is an early, experimental project. Use at your own discretion.
 From [AUR](https://aur.archlinux.org/packages/timepatrol-git), which I maintain myself.
 
 ### Other Linux
-1. Clone: `git clone https://github.com/abdeoliveira/timepatrol`
-2. Enter: `cd timepatrol`
-3. Run: `sudo ./install.sh` 
+1. `git clone https://github.com/abdeoliveira/timepatrol`
+2. `cd timepatrol`
+3. `sudo ./install.sh` 
 
 ## Uninstall
 
