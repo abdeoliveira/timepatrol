@@ -438,15 +438,14 @@ when 'help'
   puts 'COMMANDS:'.yellow.bold + " snapshot 'OPTIONAL COMMENT'"
   puts "          snapshot-keep 'OPTIONAL COMMENT'"
   puts "          change-comment ID 'NEW COMMENT'"
-  puts '          toggle-keep ID*'
-  puts '          delete ID*'
+  puts '          toggle-keep ID'
+  puts '          delete ID'
   puts '          rollback ID'
   puts '          list'
   puts '          list-verbose'
   puts "          list-grep 'STRING'"
   puts line
-  puts '* Accept IDs separated by commas and/or ranges.'
-  puts "  For example: '... delete 90,105,200-210'."
+  puts 'https://github.com/abdeoliveira/timepatrol/#Usage'
 
 else
   puts "There is no '#{option}' option.".abort
