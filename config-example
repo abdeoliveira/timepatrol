@@ -23,12 +23,6 @@ MAX_CHARACTERS_COMMENT = '35'
 # It will be created on demand and deleted afterwards. You can pick any name
 MOUNT_POINT = '/mnt/timepatroltmp'
 
-# The pacman hook takes a 'PRE:' pacman snapshot prior every pacman
-# action by default. If you *also* want a 'POST:' snapshot, i.e., a snapshot
-# after every pacman action, set the variable below to 'true'. Any other
-# is interpreted as 'false', including an empty string.
-POST_PACMAN_SNAPSHOT = ''
-
 # Set 'true' to disable colors. Any other string, including empty string,
 # will be interpreted as 'false'.
 DISABLE_COLORS = ''
