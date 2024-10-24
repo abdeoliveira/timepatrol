@@ -1,11 +1,13 @@
 #!/usr/bin/ruby
 # frozen_string_literal: true
 
-if File.file? '/etc/timepatrol/config'
-  load '/etc/timepatrol/config'
+config_file = '/etc/timepatrol/config'
+
+if File.file? config_file
+  load config_file
 else
   puts 'It seems this is your first run.'
-  puts "You must 'sudo cp /etc/timepatrol/config-example /etc/timepatrol/config',"
+  puts "You must 'sudo cp /etc/timepatrol/config-example #{config_file}',"
   puts "then edit 'config' according to your system."
   puts 'ABORTED.'
   abort

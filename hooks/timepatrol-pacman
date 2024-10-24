@@ -1,6 +1,15 @@
 #!/usr/bin/ruby
 # frozen_string_literal: true
 
+config_file = '/etc/timepatrol/config'
+
+if File.file? config_file
+  load config_file
+else
+  puts ':: TIMEPATROL: Missing configuration file. Skipping hooks!!'
+  exit 0
+end
+
 @magic_string = '@PACMAN-PRE-HOOK'
 
 def change_string(actions, path)
@@ -46,4 +55,6 @@ if ARGV[0] == 'post'
   actions.gsub!('downgraded', 'downgrade')
 
   change_string(actions, path)
+
+  `/usr/bin/timepatrol snapshot 'POST: #{actions}'` if POST_PACMAN_SNAPSHOT == 'true'
 end
