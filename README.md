@@ -165,7 +165,7 @@ cat completions/timepatrol >> ~/.bashrc
 
 For a 24/7 running machine, probably the simplest way is setting a cronjob as root. 
 
-For notebooks, I recommend (simplecron)[https://github.com/abdeoliveira/simplecron],
+For notebooks, I recommend [simplecron](https://github.com/abdeoliveira/simplecron),
 which I mantain myself.
 
 ## Troubleshooting
