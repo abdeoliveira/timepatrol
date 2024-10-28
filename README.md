@@ -163,20 +163,10 @@ cat completions/timepatrol >> ~/.bashrc
 
 ## Periodic, automatic snapshots
 
-The simplest way is probably setting a cronjob as root. 
+For a 24/7 running machine, probably the simplest way is setting a cronjob as root. 
 
-First, install `cronie`, then enable its service (e.g. something like 
-`systemctl enable --now cronie.service` for systemd users). 
-Finnaly edit the crontab
-with `sudo crontab -e`. If you for example want a hourly system snapshot, 
-use something like 
-
-```
-0 * * * * /usr/local/bin/timepatrol snapshot 'hourly snapshot' >> /tmp/timepatrol.log 2>&1
-```
-
-
-and keep an eye on the file `/tmp/timepatrol.log` for eventual errors (hope not!).
+For notebooks, I recommend (simplecron)[https://github.com/abdeoliveira/simplecron],
+which I mantain myself.
 
 ## Troubleshooting
 
@@ -202,4 +192,3 @@ since `pacman` is very good on setting things up.
 ## TODO
 
 * `timepatrol check` in order to check the integrity of the configuration file.
-* Include an in-house script for timely, automatic backups. Currently the user is expected to configure a `crontab` or something.
