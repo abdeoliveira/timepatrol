@@ -35,6 +35,6 @@ install -Dm 644 config-example -t $CONFIG_DIR/
 echo "* Installed the 'config-example' file at '$CONFIG_DIR'"
 echo " "
 echo ":: Now rename the 'config-example' file as '$CONFIG_DIR/config' and"
-echo ":: edit it as according to your system."
+echo ":: edit it according to your system."
 echo " "
 echo "SUCCESS!"
