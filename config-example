@@ -3,7 +3,7 @@
 # it will be something like /dev/mapper/something. 
 DEVICE = '/dev/mapper/root' 
 
-# The folder to hold your snapshots. 
+# The folder which will hold your snapshots. 
 SNAPSHOTS_FOLDER = '/.snapshots'
 
 # Subvolume associated to the SNAPSHOTS_FOLDER.
@@ -12,11 +12,14 @@ SNAPSHOTS_VOLUME = '@snapshots'
 # The root subvolume.
 ROOT_VOLUME = '@'
 
-# The mamixum number of snapshots to be kept. 
+# Mamixum number of snapshots to keep. 
 # Protected snapshots will not count against the MAXIMUM_SNAPSHOTS number.
 MAXIMUM_SNAPSHOTS = '60'
 
 # Maximum number of characters to fit in each line of comment's block.
+# This is a pure cosmetic variable and won't affect timepatrol's functionality. 
+# You may want to play with it and see its effect on comment's alignment running 
+# 'timepatrol list' or 'timepatrol list-verbose'.
 MAX_CHARACTERS_COMMENT = '35'
 
 # A temporary location to be used by Timepatrol when performing rollbacks.
