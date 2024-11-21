@@ -53,7 +53,7 @@ From [AUR](https://aur.archlinux.org/packages/timepatrol-git), which I maintain 
 Copy the example configuration file as
 
 ```
-cp /etc/timepatrol/config-example /etc/timepatrol/config
+sudo cp /etc/timepatrol/config-example /etc/timepatrol/config
 ```
 
 Then, check the comments in `config` file 
