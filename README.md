@@ -47,7 +47,7 @@ From [AUR](https://aur.archlinux.org/packages/timepatrol-git), which I maintain 
 
 ### Other Linux
 
-* `sudo rm -r /usr/bin/timepatrol /etc/timepatrol`
+`sudo rm -r /usr/bin/timepatrol /etc/timepatrol`
 
 ## Configuration 
 Copy the example configuration file as
