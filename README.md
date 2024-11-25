@@ -150,16 +150,22 @@ section also.
 ## Bash completion
 
 ### Arch
-Install `bash-completion`.
+1. Install `bash-completion`
+
+2. Logout and login, or reboot.
 
 
 ### Other Linux
-Install `bash-completion` and then copy and paste the contents of 
+1. Install `bash-completion` 
+
+2. Copy and paste the contents of 
 `completions/timepatrol` to your `~/.bashrc`:
 
 ```
 cat completions/timepatrol >> ~/.bashrc
 ```
+
+3. Logout and login, or reboot.
 
 ## Periodic, automatic snapshots
 
