@@ -182,9 +182,8 @@ Many factors can lead to an unbootable system after rollback.
 For example, you may have upgraded the kernel, didn't reboot
 and rollback. 
 
-I have no sufficient
-knowledge to cover all system-rescue situations, but I would say that
-the following steps would fit in most cases:
+Despite I'm unable to cover all system-rescue situations, I would say
+the following steps would help in many cases:
 
 1. Boot using a live media
 2. Chroot into your (broken) system
