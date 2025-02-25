@@ -68,19 +68,15 @@ class String
 end
 
 def root?
-  true if ENV['USER'] == 'root'
+  ENV['USER'] == 'root'
 end
 
 def max_snapshots_limit?
-  true if MAXIMUM_SNAPSHOTS.to_i > 999
+  MAXIMUM_SNAPSHOTS.to_i > 999
 end
 
 def now
   Time.new.strftime '%Y.%m.%d;%H:%M:%S'
-end
-
-def letter?(selid)
-  true if [*'a'..'z', *'A'..'Z'].include? selid
 end
 
 def snapid
