@@ -6,7 +6,7 @@ SRC_DIR=/usr/bin
 
 # CHECK IF RUNNING AS ROOT. ABORT IF FAILS.
 if [ "$EUID" -ne 0 ]; then 
-	echo "Run as 'root'. ABORTED."
+	echo "You shall run as 'root'. ABORTED."
   exit 1
 fi
 
@@ -34,7 +34,7 @@ echo "* Installed 'timepatrol' at '$SRC_DIR'."
 install -Dm 644 config-example -t $CONFIG_DIR/
 echo "* Installed the 'config-example' file at '$CONFIG_DIR'"
 echo " "
-echo ":: Now rename the 'config-example' file as '$CONFIG_DIR/config' and"
+echo ":: You shall rename the 'config-example' file as '$CONFIG_DIR/config' and"
 echo ":: edit it according to your system."
 echo " "
-echo "SUCCESS!"
+echo "Finished installation successfully!"
