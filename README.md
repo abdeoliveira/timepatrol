@@ -197,3 +197,5 @@ since `pacman` is very good on setting things up.
 ## TODO
 
 * `timepatrol check` in order to check the integrity of the configuration file.
+
+* Add selected snapshots (perhaps those marked as `keep`) into grub boot menu.
