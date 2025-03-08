@@ -21,10 +21,6 @@ In principle it can be used in any Linux distribution. Arch users
 will benefit from the `pacman` pre and post hooks which I found to be
 very handy in the day-to-day use.
 
-## Disclaimer
-
-This is an early, experimental project. Use at your own discretion.
-
 ## Dependency
 * `ruby`
 
