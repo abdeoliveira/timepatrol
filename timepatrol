@@ -120,7 +120,6 @@ def snapshot(comm, keep, fake)
   File.write("#{snapshot_path}/info", info, mode: 'w')
 end
 
-
 def word_wrap(text, indent)
   max_lines = @max_lines
   words = text.split(' ')  # Split by spaces
@@ -141,8 +140,6 @@ def word_wrap(text, indent)
   lines << line.rstrip unless line.empty? || (max_lines && lines.size >= max_lines)  # Add the last line if space allows
   lines.join("\n")  # Convert to a single string
 end
-
-
 
 def no_snapshot
   puts 'No snapshot.'.abort
