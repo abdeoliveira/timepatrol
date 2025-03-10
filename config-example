@@ -16,16 +16,6 @@ ROOT_VOLUME = '@'
 # Protected snapshots will not count against the MAXIMUM_SNAPSHOTS number.
 MAXIMUM_SNAPSHOTS = '60'
 
-# Maximum number of characters to fit in each line of comment's block.
-# This is a pure cosmetic variable and won't affect timepatrol's functionality. 
-# You may want to play with it and see its effect on comment's alignment running 
-# 'timepatrol list' or 'timepatrol list-verbose'.
-MAX_CHARACTERS_COMMENT = '35'
-
-# A temporary location to be used by Timepatrol when performing rollbacks.
-# It will be created on demand and deleted afterwards. You can pick any name
-MOUNT_POINT = '/mnt/timepatroltmp'
-
 # Set 'true' to disable colors. Any other string, including empty string,
 # will be interpreted as 'false'.
 DISABLE_COLORS = ''

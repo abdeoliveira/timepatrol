@@ -1,6 +1,9 @@
 #!/usr/bin/ruby
 # frozen_string_literal: true
 
+require 'io/console'
+require 'tmpdir'
+
 config_file = '/etc/timepatrol/config'
 
 if File.file? config_file
@@ -117,24 +120,29 @@ def snapshot(comm, keep, fake)
   File.write("#{snapshot_path}/info", info, mode: 'w')
 end
 
-def limit_string(string)
-  string[0..MAX_CHARACTERS_COMMENT.to_i]
-end
 
-def split_string(string, shift)
-  line = ''
-  total = 0
-  string.split(' ').each do |s|
-    total += limit_string(s).size
-    if total < MAX_CHARACTERS_COMMENT.to_i
-      line += "#{limit_string(s)} "
-    else
-      total = limit_string(s).size
-      line += "\n#{' ' * shift}#{limit_string(s)} "
+def word_wrap(text, indent)
+  max_lines = @max_lines
+  words = text.split(' ')  # Split by spaces
+  lines = []
+  line = ""  # First line has no indentation
+
+  words.each do |word|
+    if (line + " " + word).strip.length <= @number_cols  # Fits in current line
+      line += " " unless line.empty?
+      line += word
+    else  # Move to a new line
+      lines << line.rstrip  # Store the current line
+      break if max_lines && lines.size >= max_lines  # Stop if limit reached
+      line = (' ' * indent) + word  # Indent only from the second line
     end
   end
-  line
+
+  lines << line.rstrip unless line.empty? || (max_lines && lines.size >= max_lines)  # Add the last line if space allows
+  lines.join("\n")  # Convert to a single string
 end
+
+
 
 def no_snapshot
   puts 'No snapshot.'.abort
@@ -156,7 +164,7 @@ def colorline(string, index)
 end
 
 def line_length
-  legend.length + MAX_CHARACTERS_COMMENT.to_i - 15
+  legend.length + @number_cols - 15
 end
 
 def lineline(type)
@@ -176,14 +184,12 @@ end
 def format_information(id, info, index)
   date, time, comm, kernel, keep = info
   
-  k = 30 + @max_kernel_size + 2
-  comm  = split_string(comm, k)
+  comm  = word_wrap(comm, 30 + @max_kernel_size + 2)
   
-  kernel_size = kernel.size
+  kernel_space = @max_kernel_size - kernel.size + 2
   
   id_space = 4 - id.to_s.size
-  id = "[#{id}]"
-  id = colorline(id, index)
+  id = colorline("[#{id}]", index)
 
   date = colorline(date, index)
   time = colorline(time, index)
@@ -195,8 +201,7 @@ def format_information(id, info, index)
     id_space -= 1
   end
 
-  k = @max_kernel_size - kernel_size + 2
-  ' '*id_space+id + ' '*2 + date+' '*2 + time + ' '*2 + kernel + ' ' * k + comm
+  ' '*id_space+id + ' '*2 + date+' '*2 + time + ' '*2 + kernel + ' ' * kernel_space + comm
 end
 
 def array_selector(selid)
@@ -306,6 +311,11 @@ new_comment ||= ''
 
 @max_kernel_size = max_kernel_size
 
+@number_cols = IO.console.winsize[1] - 48
+@number_cols ||= 80
+
+@mount_point = Dir.tmpdir + '/timepatrol_tmp'
+
 case option
 when 'snapshot', 'snapshot-keep'
   keep = 0
@@ -315,6 +325,9 @@ when 'snapshot', 'snapshot-keep'
   repack if snapid.last.to_i > 990
 
 when 'list', 'list-verbose'
+
+  @max_lines = nil 
+  @max_lines = 1 if option == 'list'
   
   puts lineline('=')
   puts title
@@ -323,7 +336,6 @@ when 'list', 'list-verbose'
   
   snapid.each.with_index do |id, index|
     date, time, comm, kernel, keep = readinfo(id)
-    comm = comm[0..75].strip unless option == 'list-verbose'
     info = [date, time, comm, kernel, keep]
     puts format_information(id, info, index)
   end
@@ -352,8 +364,8 @@ when 'change-comment'
 when 'rollback'
   countdown = 10 # seconds before rebooting
 
-  if Dir.exist? MOUNT_POINT
-    puts "The '#{MOUNT_POINT}' folder shouldn't exist. ABORTED.".abort
+  if Dir.exist? @mount_point
+    puts "The '#{@mount_point}' folder shouldn't exist. ABORTED.".abort
     abort
   end
 
@@ -384,9 +396,9 @@ when 'rollback'
     abort
   end
 
-  `mkdir #{MOUNT_POINT} && mount -o subvolid=5 #{DEVICE} #{MOUNT_POINT}`
-  root_dir_exists = Dir.exist? "#{MOUNT_POINT}/#{ROOT_VOLUME}"
-  snapshots_dir_exists = Dir.exist? "#{MOUNT_POINT}/#{SNAPSHOTS_VOLUME}"
+  `mkdir #{@mount_point} && mount -o subvolid=5 #{DEVICE} #{@mount_point}`
+  root_dir_exists = Dir.exist? "#{@mount_point}/#{ROOT_VOLUME}"
+  snapshots_dir_exists = Dir.exist? "#{@mount_point}/#{SNAPSHOTS_VOLUME}"
   unless root_dir_exists && snapshots_dir_exists
     puts 'Mounting stage went wrong. ABORTED.'.abort
     abort
@@ -396,8 +408,8 @@ when 'rollback'
   date, time = readinfo(rollid)
   snapshot("PRE: rollback to [#{date} #{time}]", 0, true)
 
-  `mv #{MOUNT_POINT}/#{ROOT_VOLUME} #{MOUNT_POINT}/#{SNAPSHOTS_VOLUME}/#{id}/data`
-  `btrfs subvolume snapshot #{MOUNT_POINT}/#{SNAPSHOTS_VOLUME}/#{rollid}/data #{MOUNT_POINT}/#{ROOT_VOLUME}`
+  `mv #{@mount_point}/#{ROOT_VOLUME} #{@mount_point}/#{SNAPSHOTS_VOLUME}/#{id}/data`
+  `btrfs subvolume snapshot #{@mount_point}/#{SNAPSHOTS_VOLUME}/#{rollid}/data #{@mount_point}/#{ROOT_VOLUME}`
   list_subvol = `btrfs subvolume list /`.split("\n")
   list_subvol.each do |subvol|
     data = subvol.split(' ')
@@ -406,7 +418,7 @@ when 'rollback'
       break
     end
   end
-  `umount #{MOUNT_POINT} && rm -r #{MOUNT_POINT}`
+  `umount #{@mount_point} && rm -r #{@mount_point}`
 
   puts 'Confirmed. Rebooting in...'.inform
   (countdown - 1).times do
