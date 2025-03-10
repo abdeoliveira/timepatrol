@@ -67,6 +67,17 @@ class String
   end
 end
 
+def max_kernel_size
+  array_kernel_size = Array.new
+
+  snapid.each.with_index do |id, index|
+    date, time, comm, kernel, keep = readinfo(id)
+    array_kernel_size << kernel.size
+  end
+
+  return array_kernel_size.max
+end
+
 def root?
   ENV['USER'] == 'root'
 end
@@ -133,10 +144,7 @@ end
 def readinfo(id)
   path = "#{SNAPSHOTS_FOLDER}/#{id}"
   no_snapshot unless Dir.exist? path
-  info = File.read("#{path}/info").strip.split(';')
-  date, time, comm, kernel, keep = info
-  comm  = split_string(comm, 46)
-  [date, time, comm, kernel, keep]
+  return File.read("#{path}/info").strip.split(';')
 end
 
 def colorline(string, index)
@@ -161,24 +169,34 @@ def title
 end
 
 def legend
-  "#{' '*3}ID#{' '*3}DATE#{' '*8}TIME#{' '*6}KERNEL#{' '*10}COMMENT".bold
+  k = @max_kernel_size - 4
+  "#{' '*3}ID#{' '*3}DATE#{' '*8}TIME#{' '*6}KERNEL#{' '*k}COMMENT".bold
 end
 
 def format_information(id, info, index)
   date, time, comm, kernel, keep = info
+  
+  k = 30 + @max_kernel_size + 2
+  comm  = split_string(comm, k)
+  
+  kernel_size = kernel.size
+  
   id_space = 4 - id.to_s.size
-  kernel_space = 16 - kernel.size
   id = "[#{id}]"
   id = colorline(id, index)
+
   date = colorline(date, index)
   time = colorline(time, index)
   comm = colorline(comm, index)
   kernel = colorline(kernel, index)
+
   if keep == '1'
     id = '*'.green.bold + id
     id_space -= 1
   end
-  ' '*id_space+id+' '*2+date+' '*2+time+' '*2+kernel+' '*kernel_space+comm
+
+  k = @max_kernel_size - kernel_size + 2
+  ' '*id_space+id + ' '*2 + date+' '*2 + time + ' '*2 + kernel + ' ' * k + comm
 end
 
 def array_selector(selid)
@@ -286,6 +304,8 @@ option ||= 'help'
 selid ||= ''
 new_comment ||= ''
 
+@max_kernel_size = max_kernel_size
+
 case option
 when 'snapshot', 'snapshot-keep'
   keep = 0
@@ -295,19 +315,22 @@ when 'snapshot', 'snapshot-keep'
   repack if snapid.last.to_i > 990
 
 when 'list', 'list-verbose'
+  
   puts lineline('=')
   puts title
   puts lineline('=')
   puts legend
+  
   snapid.each.with_index do |id, index|
     date, time, comm, kernel, keep = readinfo(id)
     comm = comm[0..110].strip unless option == 'list-verbose'
     info = [date, time, comm, kernel, keep]
     puts format_information(id, info, index)
   end
+  
   puts lineline('-')
   puts "TOTAL: #{snapid.length}".bold
-
+  
 when 'list-grep'
   selid ||= abort
   grep_string(substring_selector("comment=#{selid}"), selid)
