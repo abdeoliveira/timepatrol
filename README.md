@@ -180,8 +180,8 @@ While I can't cover every possible system recovery scenario, the following steps
 
 1. Boot from a live media.
 2. Chroot into your (broken) system.
-3. Mount all partitions (e.g., mount -a).
-4. Regenerate the initramfs (mkinitcpio -P for Arch, or the equivalent for your distro).
+3. Mount all partitions (e.g., `mount -a`).
+4. Regenerate the initramfs (`mkinitcpio -P` for Arch, or the equivalent for your distro).
 5. If the issue persists, try downgrading the kernel. On Arch, pacman generally handles this well.
 6. Exit chroot and reboot.
 
