@@ -74,7 +74,7 @@ def max_kernel_size
   array_kernel_size = Array.new
 
   snapid.each.with_index do |id, index|
-    date, time, comm, kernel, keep = readinfo(id)
+    kernel = readinfo(id)[3]
     array_kernel_size << kernel.size
   end
 
@@ -98,7 +98,7 @@ def snapid
   subvolumes = `btrfs subvolume list /`
   subvolumes.split("\n").each do |line|
     if line.include?(SNAPSHOTS_VOLUME) && line.include?('data')
-      id_list << (line.split "#{SNAPSHOTS_VOLUME}/").last.delete('/data')
+      id_list << (line.split "#{SNAPSHOTS_VOLUME}/").last.delete('/data').to_i
     end
   end
   id_list.sort
@@ -110,7 +110,7 @@ def sanitize(string)
 end
 
 def snapshot(comm, keep, fake)
-  snapshot_path = "#{SNAPSHOTS_FOLDER}/#{snapid.last.to_i + 1}"
+  snapshot_path = "#{SNAPSHOTS_FOLDER}/#{snapid.last + 1}"
   `mkdir #{snapshot_path}`
   unless fake
     puts `btrfs subvolume snapshot / #{snapshot_path}/data`
@@ -120,9 +120,23 @@ def snapshot(comm, keep, fake)
   File.write("#{snapshot_path}/info", info, mode: 'w')
 end
 
+def chunk_words(words)
+  words.flat_map do |word|
+    if word.length > @number_cols
+      # Chunk the word into pieces of size `ncol`
+      word.scan(/.{1,#{@number_cols}}/)
+    else
+      # If the word fits within `number_cols`, return it as is
+      word
+    end
+  end
+end
+
 def word_wrap(text, indent)
-  max_lines = @max_lines
+  
   words = text.split(' ')  # Split by spaces
+  words = chunk_words(words) # Split big words into chunks
+
   lines = []
   line = ""  # First line has no indentation
 
@@ -132,12 +146,12 @@ def word_wrap(text, indent)
       line += word
     else  # Move to a new line
       lines << line.rstrip  # Store the current line
-      break if max_lines && lines.size >= max_lines  # Stop if limit reached
+      break if @max_lines && lines.size >= @max_lines  # Stop if limit reached
       line = (' ' * indent) + word  # Indent only from the second line
     end
   end
 
-  lines << line.rstrip unless line.empty? || (max_lines && lines.size >= max_lines)  # Add the last line if space allows
+  lines << line.rstrip unless line.empty? || (@max_lines && lines.size >= @max_lines)  # Add the last line if space allows
   lines.join("\n")  # Convert to a single string
 end
 
@@ -161,7 +175,7 @@ def colorline(string, index)
 end
 
 def line_length
-  legend.length + @number_cols - 15
+  @number_cols + 32 + @max_kernel_size
 end
 
 def lineline(type)
@@ -181,7 +195,7 @@ end
 def format_information(id, info, index)
   date, time, comm, kernel, keep = info
   
-  comm  = word_wrap(comm, 30 + @max_kernel_size + 2)
+  comm  = word_wrap(comm, 32 + @max_kernel_size)
   
   kernel_space = @max_kernel_size - kernel.size + 2
   
@@ -227,9 +241,9 @@ def ids_selector(selid)
   array_selected = []
   selid.split(',').each do |item|
     if item.include? '-'
-      range = item.split('-')
+      range = item.split('-').map(&:to_i)
       snapid.each do |id| 
-        array_selected << id if id.to_i >= range.min.to_i && id.to_i <= range.max.to_i
+        array_selected << id if id >= range.min and id <= range.max
       end
     else
       array_selected << item
@@ -308,7 +322,7 @@ new_comment ||= ''
 
 @max_kernel_size = max_kernel_size
 
-@number_cols = IO.console.winsize[1] - 48
+@number_cols = IO.console.winsize[1] - 32 - @max_kernel_size
 @number_cols ||= 80
 
 @mount_point = Dir.tmpdir + '/timepatrol_tmp'
@@ -319,7 +333,7 @@ when 'snapshot', 'snapshot-keep'
   keep = 1 if option == 'snapshot-keep'
   snapshot(selid, keep, false)
   prune if snapid.length >= MAXIMUM_SNAPSHOTS.to_i
-  repack if snapid.last.to_i > 990
+  repack if snapid.last > 990
 
 when 'list', 'list-verbose'
 
@@ -401,7 +415,7 @@ when 'rollback'
     abort
   end
 
-  id = snapid.last.to_i + 1
+  id = snapid.last + 1
   date, time = readinfo(rollid)
   snapshot("PRE: rollback to [#{date} #{time}]", 0, true)
 
