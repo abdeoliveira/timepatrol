@@ -174,24 +174,18 @@ which I mantain myself.
 
 ### Unbootable system after rollback
 
-Many factors can lead to an unbootable system after rollback.
-For example, you may have upgraded the kernel, didn't reboot
-and rollback. 
+Several factors can lead to an unbootable system after a rollback. For instance, if you upgraded the kernel but didn't reboot before rolling back, your system might fail to start.
 
-Despite I'm unable to cover all system-rescue situations, I would say
-the following steps would help in many cases:
+While I can't cover every possible system recovery scenario, the following steps should help in many cases:
 
-1. Boot using a live media
-2. Chroot into your (broken) system
-3. Mount all partitions (eg. `mount -a`)
-4. Reinstall your boot loader. Alterativelly, 
-you can try to downgrade the kernel. If you are on Arch, try this second route 
-since `pacman` is very good on setting things up. 
-5. Exit chroot. Reboot.
+1. Boot from a live media.
+2. Chroot into your (broken) system.
+3. Mount all partitions (e.g., mount -a).
+4. Regenerate the initramfs (mkinitcpio -P for Arch, or the equivalent for your distro).
+5. If the issue persists, try downgrading the kernel. On Arch, pacman generally handles this well.
+6. Exit chroot and reboot.
 
 
 ## TODO
 
 * `timepatrol check` in order to check the integrity of the configuration file.
-
-* Add selected snapshots (perhaps those marked as `keep`) into grub boot menu.
