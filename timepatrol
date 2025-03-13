@@ -123,7 +123,7 @@ end
 def chunk_words(words)
   words.flat_map do |word|
     if word.length > @number_cols
-      # Chunk the word into pieces of size `ncol`
+      # Chunk the word into pieces of size `@number_cols`
       word.scan(/.{1,#{@number_cols}}/)
     else
       # If the word fits within `number_cols`, return it as is
@@ -346,9 +346,7 @@ when 'list', 'list-verbose'
   puts legend
   
   snapid.each.with_index do |id, index|
-    date, time, comm, kernel, keep = readinfo(id)
-    info = [date, time, comm, kernel, keep]
-    puts format_information(id, info, index)
+    puts format_information(id, readinfo(id), index)
   end
   
   puts lineline('-')
@@ -398,8 +396,7 @@ when 'rollback'
   end
 
   puts 'Rolling back to the following snapshot:'.inform
-  info = readinfo(rollid)
-  puts format_information(rollid, info, 1)
+  puts format_information(rollid, readinfo(rollid), 1)
 
   puts 'Confirm? [y/N]'.decide
   unless $stdin.gets.chomp == 'y'
@@ -445,8 +442,7 @@ when 'delete'
   no_snapshot if array.empty?
 
   array.each do |iid|
-    info_array = readinfo(iid)
-    puts format_information(iid, info_array, 1)
+    puts format_information(iid, readinfo(iid), 1)
   end
 
   puts 'Confirm deletion of the selected snapshot(s) above? [y/N]'.decide
