@@ -303,7 +303,7 @@ def write_to_file(id, string)
 end
 
 def number_cols
-  `stty size`.split.last.to_i - 32 - @max_kernel_size rescue 80
+  `stty size`.split.last.to_i - 32 - @max_kernel_size 
 end
 #=============================================
 
@@ -328,7 +328,7 @@ new_comment ||= ''
 @max_kernel_size = max_kernel_size || 0
 
 #@number_cols = IO.console.winsize[1] - 32 - @max_kernel_size
-@number_cols = number_cols
+@number_cols = number_cols || 80
 
 @mount_point = Dir.tmpdir + '/timepatrol_tmp'
 
