@@ -1,7 +1,7 @@
 #!/usr/bin/ruby
 # frozen_string_literal: true
 
-require 'io/console'
+#require 'io/console'
 require 'tmpdir'
 
 config_file = '/etc/timepatrol/config'
@@ -322,8 +322,8 @@ new_comment ||= ''
 
 @max_kernel_size = max_kernel_size
 
-@number_cols = IO.console.winsize[1] - 32 - @max_kernel_size
-@number_cols ||= 80
+#@number_cols = IO.console.winsize[1] - 32 - @max_kernel_size
+@number_cols = `stty size`.split.last.to_i - 32 - @max_kernel_size rescue 80
 
 @mount_point = Dir.tmpdir + '/timepatrol_tmp'
 
