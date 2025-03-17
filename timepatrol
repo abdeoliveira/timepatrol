@@ -110,7 +110,8 @@ def sanitize(string)
 end
 
 def snapshot(comm, keep, fake)
-  snapshot_path = "#{SNAPSHOTS_FOLDER}/#{snapid.last + 1}"
+  #snapshot_path = "#{SNAPSHOTS_FOLDER}/#{snapid.last + 1}"
+  snapshot_path = "#{SNAPSHOTS_FOLDER}/#{(snapid.last || 0) + 1}"
   `mkdir #{snapshot_path}`
   unless fake
     puts `btrfs subvolume snapshot / #{snapshot_path}/data`
@@ -300,6 +301,9 @@ def write_to_file(id, string)
   File.write(file, string, mode: 'w')
 end
 
+def number_cols
+  `stty size`.split.last.to_i - 32 - @max_kernel_size rescue 80
+end
 #=============================================
 
 unless root?
@@ -320,10 +324,10 @@ option ||= 'help'
 selid ||= ''
 new_comment ||= ''
 
-@max_kernel_size = max_kernel_size
+@max_kernel_size = max_kernel_size || 0
 
 #@number_cols = IO.console.winsize[1] - 32 - @max_kernel_size
-@number_cols = `stty size`.split.last.to_i - 32 - @max_kernel_size rescue 80
+@number_cols = number_cols
 
 @mount_point = Dir.tmpdir + '/timepatrol_tmp'
 
