@@ -190,6 +190,7 @@ end
 
 def legend
   k = @max_kernel_size - 4
+  k = 0 if k.negative?
   "#{' '*3}ID#{' '*3}DATE#{' '*8}TIME#{' '*6}KERNEL#{' '*k}COMMENT".bold
 end
 
