@@ -7,6 +7,7 @@ unless File.file? '/etc/timepatrol/config'
 end
 
 post_snapshot = true
+post_snapshot = false if File.file? '/etc/timepatrol/ignore_post_snapshot'
 
 @magic_string = '@PACMAN-PRE-HOOK'
 

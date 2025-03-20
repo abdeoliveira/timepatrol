@@ -1,9 +1,6 @@
 #!/usr/bin/ruby
 # frozen_string_literal: true
 
-#require 'io/console'
-#require 'tmpdir'
-
 config_file = '/etc/timepatrol/config'
 
 if File.file? config_file
@@ -71,9 +68,9 @@ class String
 end
 
 def max_kernel_size
-  array_kernel_size = Array.new
+  array_kernel_size = []
 
-  snapid.each.with_index do |id, index|
+  snapid.each do |id|
     kernel = readinfo(id)[3]
     array_kernel_size << kernel.size
   end
@@ -110,7 +107,6 @@ def sanitize(string)
 end
 
 def snapshot(comm, keep, fake)
-  #snapshot_path = "#{SNAPSHOTS_FOLDER}/#{snapid.last + 1}"
   snapshot_path = "#{SNAPSHOTS_FOLDER}/#{(snapid.last || 0) + 1}"
   `mkdir #{snapshot_path}`
   unless fake
@@ -327,9 +323,7 @@ selid ||= ''
 new_comment ||= ''
 
 @max_kernel_size = max_kernel_size || 0
-
 @number_cols = number_cols || 80
-
 @mount_point = '/tmp/timepatrol_rollback'
 
 case option
