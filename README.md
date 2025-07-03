@@ -81,6 +81,8 @@ UUID=054b4420-a2e0-41b1-8d66-8cc7198d8b55	/var/log  	btrfs     	rw,relatime,ssd,
 
 Type `sudo timepatrol help` for a basic list of commands. They are
 
+* `check`: checks the configuration file and simulates (dryrun) a rollback.
+
 * `list`: lists snapshots limiting shown comment characters.
 
 * `list-verbose`: lists snapshots without limiting comment characters.
