@@ -66,6 +66,97 @@ class String
   end
 end
 
+def check_config(config_file)
+  puts 'Performing configuration check...'.inform
+  puts "Verifying '#{config_file}'...".bold
+  all_ok = true
+
+  # --- Part 1: Variable and Value Checks ---
+  required_vars = {
+    'DISABLE_COLORS'    => 'A string, either "true" or "false".',
+    'MAXIMUM_SNAPSHOTS' => 'A positive integer, e.g., 20.',
+    'SNAPSHOTS_FOLDER'  => 'A valid path to an existing directory, e.g., "/.snapshots".',
+    'SNAPSHOTS_VOLUME'  => 'The name of your snapshots subvolume, e.g., ".snapshots".',
+    'DEVICE'            => 'Your Btrfs partition, e.g., "/dev/sda1".',
+    'ROOT_VOLUME'       => 'The name of your root subvolume, e.g., "root".'
+  }
+
+  required_vars.each do |var, description|
+    if Object.const_defined?(var)
+      value = Object.const_get(var)
+      puts "  [OK] ".green + "'#{var}' is defined."
+
+      if var == 'SNAPSHOTS_FOLDER' && !Dir.exist?(value)
+        puts "       └─ " + "ERROR: This directory does not exist.".red
+        all_ok = false
+      elsif var == 'MAXIMUM_SNAPSHOTS'
+        int_value = value.to_i
+        if int_value <= 0
+          puts "       └─ " + "ERROR: This value must be a positive number.".red
+          all_ok = false
+        elsif int_value >= 999
+          puts "       └─ " + "ERROR: This value must be less than 999.".red
+          all_ok = false
+        end
+      end
+    else
+      puts "  [FAIL] ".red + "'#{var}' is missing. It should be: #{description}"
+      all_ok = false
+    end
+  end
+
+  # --- Part 2: Rollback Simulation (using shell redirection) ---
+  if all_ok
+    puts 'Simulating rollback mount procedure...'.inform
+    check_mount_point = '/tmp/timepatrol_check_mount'
+    mount_succeeded = false
+
+    begin
+      `mkdir #{check_mount_point}`
+
+      # 1. Add `2>&1` to the command to redirect stderr to stdout
+      mount_cmd = "mount -o subvolid=5,ro #{DEVICE} #{check_mount_point} 2>&1"
+      output = `#{mount_cmd}` # Backticks will now capture errors
+
+      # 2. Check the special variable `$?.success?` for the exit status
+      if $?.success?
+        mount_succeeded = true
+        puts "  [OK] ".green + "Device mounted successfully (read-only)."
+
+        if Dir.exist?("#{check_mount_point}/#{ROOT_VOLUME}")
+          puts "  [OK] ".green + "Found root volume: '#{ROOT_VOLUME}'"
+        else
+          puts "  [FAIL] ".red + "Could NOT find root volume: '#{ROOT_VOLUME}'. Rollback will fail."
+          all_ok = false
+        end
+
+        if Dir.exist?("#{check_mount_point}/#{SNAPSHOTS_VOLUME}")
+          puts "  [OK] ".green + "Found snapshots volume: '#{SNAPSHOTS_VOLUME}'"
+        else
+          puts "  [FAIL] ".red + "Could NOT find snapshots volume: '#{SNAPSHOTS_VOLUME}'. Rollback will fail."
+          all_ok = false
+        end
+      else
+        # If the command failed, the 'output' variable now holds the error message.
+        puts "  [FAIL] ".red + "Could not mount device '#{DEVICE}'."
+        puts "       └─ " + "Reason: #{output.strip}".red # Print the captured error
+        all_ok = false
+      end
+    ensure
+      `umount #{check_mount_point} 2>/dev/null` if mount_succeeded
+      `rm -r #{check_mount_point} 2>/dev/null`
+    end
+  end
+
+  # --- Final Summary ---
+  if all_ok
+    puts 'Configuration check passed!'.inform
+  else
+    puts 'Configuration check failed. Please review your config file.'.abort
+    abort
+  end
+end
+
 def max_kernel_size
   array_kernel_size = []
 
@@ -321,11 +412,25 @@ option ||= 'help'
 selid ||= ''
 new_comment ||= ''
 
-@max_kernel_size = max_kernel_size || 0
-@number_cols = number_cols || 80
+# A list of commands that need display variables calculated
+display_commands = ['list', 'list-verbose', 'list-grep', 'rollback', 'delete']
+
+if display_commands.include?(option)
+  # If the command is in the list, calculate display variables
+  @max_kernel_size = max_kernel_size || 0
+  @number_cols = number_cols
+else
+  # For other commands, just set a default column number
+  @number_cols = `tput cols`.to_i
+end
+
 @mount_point = '/tmp/timepatrol_rollback'
 
 case option
+
+when 'check'
+  check_config(config_file)
+
 when 'snapshot', 'snapshot-keep'
   keep = 0
   keep = 1 if option == 'snapshot-keep'
@@ -334,7 +439,6 @@ when 'snapshot', 'snapshot-keep'
   repack if snapid.last > 990
 
 when 'list', 'list-verbose'
-
   @max_lines = nil 
   @max_lines = 1 if option == 'list'
   
@@ -479,6 +583,7 @@ when 'help'
   puts '          toggle-keep ID'
   puts '          delete ID'
   puts '          rollback ID'
+  puts '          check'
   puts '          list'
   puts '          list-verbose'
   puts "          list-grep 'STRING'"
