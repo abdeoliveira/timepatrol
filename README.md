@@ -55,6 +55,8 @@ sudo cp /etc/timepatrol/config-example /etc/timepatrol/config
 Then, check the comments in `config` file 
 for directions and adjust it as per your system. 
 
+**Once you have finished, I recommend you run `sudo timepatrol check` to see if timepatrol spots any misconfiguration.**
+
 **A note regarding `/etc/fstab`**: The default installation in some distributions 
 (Arch for instance) include the `subvolid` information in `fstab` for mounting 
 points. Since rollbacks change such a number I recommend you omit the `subvolid` 
