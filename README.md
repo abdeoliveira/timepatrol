@@ -1,3 +1,8 @@
+# THIS IS ARCHIVED AND IS NO LONGER MAINTAINED. 
+# 
+# Fedora users: see btrfs-patrol, a Python reimplementation of timepatrol for Fedora with dnf5 support.
+# NOTE: I do not participate in, nor do I have any relation to, the project above.   
+
 # timepatrol
 
 ## BTRFS snapshots manager and rollback tool 
